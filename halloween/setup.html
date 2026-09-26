@@ -404,9 +404,16 @@ img{display:block}
 }
 
 /* プロフィールの部屋 */
+/* プロフィールの部屋は、カードを画面の真ん中に置きます
+   （左右の飾りはカードの後ろへ回して、文字が隠れないようにします） */
 .profile-room .wall{align-items:center;justify-content:center;
-  padding-left:max(var(--edge-l),24px);padding-right:max(var(--edge-r),24px);
-  transform:translateY(calc(var(--eye) - 50%))}
+  padding-left:16px;padding-right:16px;transform:none}
+.profile-room .side{z-index:1}
+.profile-room .card{
+  max-width:min(560px, calc(100vw - 32px));
+  max-height:calc(100% - 150px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  overflow-y:auto;overscroll-behavior:contain;
+}
 .card{
   max-width:min(560px,88vw);background:#FAF7F1;padding:clamp(26px,6vw,44px);
   box-shadow:0 18px 40px rgba(0,0,0,.5),0 3px 10px rgba(0,0,0,.3);
