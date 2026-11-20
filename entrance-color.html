@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>入口の色えらび ／ オンライン個展テンプレート用</title>
+<style>
+:root{
+  --bg:#EFEFEB;
+  --panel:#FBFBF9;
+  --ink:#1A1F24;
+  --mute:#6B7178;
+  --line:rgba(60,68,75,.16);
+  --indigo:#2E4A63;
+  --mincho:"Hiragino Mincho ProN","Yu Mincho","YuMincho","HGS明朝E",Georgia,serif;
+  --gothic:"Hiragino Sans","Yu Gothic","YuGothic","Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:var(--gothic);
+  line-height:1.75;-webkit-font-smoothing:antialiased;
+  padding:clamp(20px,5vw,48px) clamp(14px,4vw,24px) 80px}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--indigo);outline-offset:3px}
+.wrap{max-width:760px;margin:0 auto}
+
+header{text-align:center;margin-bottom:clamp(22px,5vw,38px)}
+.eyebrow{font-family:var(--mincho);font-size:10px;letter-spacing:.4em;
+  text-indent:.4em;color:var(--mute)}
+h1{font-family:var(--mincho);font-weight:400;font-size:clamp(20px,5.4vw,29px);
+  letter-spacing:.14em;text-indent:.14em;margin:9px 0 8px}
+header p{font-size:12.5px;color:var(--mute)}
+
+section{background:var(--panel);border:1px solid var(--line);
+  padding:clamp(15px,4vw,22px);margin-bottom:12px}
+h2{font-family:var(--mincho);font-weight:400;font-size:14.5px;
+  letter-spacing:.12em;margin-bottom:4px}
+.hint{font-size:11.5px;color:var(--mute);line-height:1.9;margin-bottom:14px}
+
+/* 色見本のボタン */
+.sw{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
+.sw button{
+  border:1px solid var(--line);padding:8px;text-align:center;
+  transition:border-color .2s,box-shadow .2s;
+}
+.sw button.on{border-color:var(--indigo);box-shadow:inset 0 0 0 1px var(--indigo)}
+.sw i{display:block;height:38px;margin-bottom:7px;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.1)}
+.sw em{font-style:normal;font-size:11px;letter-spacing:.06em;color:var(--mute)}
+
+.tune{margin-top:14px}
+.tune label{display:flex;justify-content:space-between;align-items:baseline;
+  font-size:11.5px;color:var(--mute);margin-bottom:7px}
+.tune label b{font-family:var(--mincho);font-weight:400;font-size:12.5px;
+  letter-spacing:.1em;color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--indigo)}
+
+/* 見え方 */
+.stage{
+  position:relative;height:clamp(300px,58vw,420px);overflow:hidden;
+  border:1px solid var(--line);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:clamp(10px,2.4vh,20px);padding:22px;text-align:center;
+  transition:background .35s ease;
+}
+.pv-eyebrow{font-family:var(--mincho);font-size:9px;letter-spacing:.42em;
+  text-indent:.42em}
+.pv-title{font-family:var(--mincho);font-size:clamp(19px,4.6vw,26px);
+  letter-spacing:.16em;text-indent:.16em;line-height:1.5}
+.pv-artist{font-family:var(--mincho);font-size:10.5px;letter-spacing:.3em;
+  text-indent:.3em}
+.pv-door{
+  position:relative;width:clamp(66px,15vw,92px);aspect-ratio:5/9;
+  border-radius:3px 3px 0 0;transition:background .35s ease;
+}
+.pv-door .dent{position:absolute;inset:11% 14%;border-radius:2px}
+.pv-door .seep{position:absolute;left:6%;right:6%;bottom:-1px;height:3px;
+  filter:blur(2.5px);opacity:.9}
+.pv-door .knob{position:absolute;right:16%;top:52%;width:5px;height:5px;
+  border-radius:50%}
+.pv-enter{font-family:var(--mincho);font-size:10px;letter-spacing:.42em;
+  text-indent:.42em;padding:9px 20px}
+.note{font-size:11px;color:var(--mute);text-align:center;margin:8px 0 20px}
+.warn{color:#8A4A32}
+
+/* 書き出し */
+.out{background:#22282E;padding:15px 17px}
+.out .ttl{font-size:10px;letter-spacing:.3em;text-indent:.3em;
+  color:#8D99A4;margin-bottom:10px}
+pre{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;
+  line-height:1.9;color:#DDE4EA;white-space:pre-wrap;word-break:break-all}
+.copy{margin-top:12px;font-size:11.5px;letter-spacing:.14em;color:#DDE4EA;
+  border:1px solid rgba(221,228,234,.34);padding:9px 18px;transition:background .25s}
+.copy:hover{background:rgba(221,228,234,.1)}
+.how{font-size:11.5px;color:var(--mute);margin-top:13px;line-height:2}
+.how code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;
+  background:rgba(60,68,75,.09);padding:1px 5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">ENTRANCE COLOR</div>
+  <h1>入口の色をえらぶ</h1>
+  <p>扉と背景を選ぶと、文字の色は自動で決まります。</p>
+</header>
+
+<section>
+  <h2>扉</h2>
+  <p class="hint">作品の世界に合う色をえらんでください。</p>
+  <div class="sw" id="doorSw"></div>
+  <div class="tune">
+    <label><b>扉の明るさ</b><span id="dv"></span></label>
+    <input type="range" id="dl" min="8" max="94" value="14">
+  </div>
+</section>
+
+<section>
+  <h2>ノブ</h2>
+  <div class="sw" id="knobSw"></div>
+</section>
+
+<section>
+  <h2>背景</h2>
+  <p class="hint">扉のまわりの空気です。暗いほど、入場したときの明るさが際立ちます。</p>
+  <div class="sw" id="bgSw"></div>
+  <div class="tune">
+    <label><b>背景の明るさ</b><span id="bv"></span></label>
+    <input type="range" id="bl" min="6" max="92" value="12">
+  </div>
+</section>
+
+<div class="stage" id="stage">
+  <div class="pv-eyebrow" id="pvEyebrow">ONLINE EXHIBITION</div>
+  <div class="pv-title" id="pvTitle">展示タイトル</div>
+  <div class="pv-artist" id="pvArtist">Your Name</div>
+  <div class="pv-door" id="pvDoor">
+    <span class="dent" id="pvDent"></span>
+    <span class="seep" id="pvSeep"></span>
+    <span class="knob" id="pvKnob"></span>
+  </div>
+  <div class="pv-enter" id="pvEnter">ENTER</div>
+</div>
+<div class="note" id="note"></div>
+
+<div class="out">
+  <div class="ttl">index.html の冒頭に貼る</div>
+  <pre id="css"></pre>
+  <button class="copy" id="copy">この13行をコピー</button>
+</div>
+
+<div class="how">
+  <code>index.html</code> の上のほう、<code>:root{</code> の中にある同じ名前の行を、
+  この13行で置き換えてください。<br>
+  上書き保存して <code>F5</code> を押すと、入口の色が変わります。
+</div>
+
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+
+/* ---------- 色の変換（sRGB ⇄ Lab ⇄ LCh） ---------- */
+const D65 = [95.047, 100, 108.883];
+const lin = c => (c /= 255) <= .04045 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4);
+const unlin = c => {
+  c = c <= .0031308 ? c * 12.92 : 1.055 * Math.pow(c, 1 / 2.4) - .055;
+  return Math.round(Math.min(1, Math.max(0, c)) * 255);
+};
+function lab2rgb(L, a, bb){
+  const fy = (L + 16) / 116, fx = fy + a / 500, fz = fy - bb / 200;
+  const g = t => t*t*t > .008856 ? t*t*t : (t - 16/116) / 7.787;
+  const x = g(fx) * D65[0] / 100, y = g(fy) * D65[1] / 100, z = g(fz) * D65[2] / 100;
+  return [
+    unlin(x*3.2406 + y*-1.5372 + z*-0.4986),
+    unlin(x*-0.9689 + y*1.8758 + z*0.0415),
+    unlin(x*0.0557 + y*-0.2040 + z*1.0570)
+  ];
+}
+function lch(L, C, h){
+  const r = h * Math.PI / 180;
+  return lab2rgb(L, C * Math.cos(r), C * Math.sin(r));
+}
+const hex = (L, C, h) =>
+  '#' + lch(L, C, h).map(v => v.toString(16).padStart(2, '0')).join('').toUpperCase();
+const rgba = (L, C, h, a) => {
+  const [r, g, b] = lch(L, C, h);
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+};
+/* 明るさ（見やすさの計算用） */
+function lum(L, C, h){
+  const [r, g, b] = lch(L, C, h);
+  const f = v => { v /= 255; return v <= .03928 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4); };
+  return .2126*f(r) + .7152*f(g) + .0722*f(b);
+}
+function ratio(l1, l2){
+  const a = Math.max(l1, l2), b = Math.min(l1, l2);
+  return (a + .05) / (b + .05);
+}
+
+/* ---------- 選べる色 ---------- */
+const DOORS = [
+  { key:"焦げ茶の木", C:11, h:62,  L:14 },
+  { key:"白木",       C:6,  h:76,  L:92 },
+  { key:"黒",         C:2,  h:250, L:11 },
+  { key:"深い紺",     C:15, h:280, L:17 },
+  { key:"えんじ",     C:24, h:22,  L:21 },
+  { key:"深緑",       C:15, h:152, L:20 }
+];
+const KNOBS = [
+  { key:"金",   C:22, h:80,  L:74 },
+  { key:"銀",   C:3,  h:250, L:80 },
+  { key:"黒",   C:2,  h:250, L:26 },
+  { key:"真鍮", C:18, h:70,  L:56 }
+];
+const BGS = [
+  { key:"夜（紺）",   C:9,  h:265, L:12 },
+  { key:"墨（黒）",   C:2,  h:250, L:9  },
+  { key:"夕暮れ（紫）", C:14, h:315, L:16 },
+  { key:"深い赤",     C:22, h:22,  L:15 },
+  { key:"灯り（橙）", C:24, h:52,  L:20 },
+  { key:"桜（薄紅）", C:12, h:5,   L:84 },
+  { key:"霧（灰）",   C:3,  h:250, L:38 },
+  { key:"淡い光",     C:7,  h:70,  L:88 }
+];
+
+let dI = 0, kI = 0, bI = 0;
+
+function makeSwatches(list, el, get, set, colorOf){
+  el.innerHTML = '';
+  list.forEach((c, i) => {
+    const b = document.createElement('button');
+    b.className = (get() === i ? 'on' : '');
+    b.innerHTML = '<i style="background:' + colorOf(c) + '"></i><em>' + c.key + '</em>';
+    b.addEventListener('click', () => { set(i); paint(); });
+    el.appendChild(b);
+  });
+}
+
+function refreshSwatches(){
+  makeSwatches(DOORS, $('#doorSw'), () => dI, i => { dI = i; $('#dl').value = DOORS[i].L; },
+    c => hex(c.L, c.C, c.h));
+  makeSwatches(KNOBS, $('#knobSw'), () => kI, i => kI = i,
+    c => hex(c.L, c.C, c.h));
+  makeSwatches(BGS, $('#bgSw'), () => bI, i => { bI = i; $('#bl').value = BGS[i].L; },
+    c => hex(c.L, c.C, c.h));
+}
+
+/* ---------- 描く ---------- */
+function paint(){
+  const d = DOORS[dI], k = KNOBS[kI], b = BGS[bI];
+  const dL = +$('#dl').value, bL = +$('#bl').value;
+
+  /* 背景 */
+  const night   = hex(bL, b.C, b.h);
+  const nightHi = hex(Math.min(96, bL + 7), b.C * .9, b.h);
+
+  /* 扉 */
+  const doorA = hex(Math.min(97, dL + 5), d.C, d.h);
+  const doorB = hex(Math.max(4,  dL - 5), d.C, d.h);
+  const edge  = hex(Math.min(97, dL + 11), d.C * .9, d.h);
+  const dLine = dL > 55 ? rgba(Math.max(4, dL - 34), d.C, d.h, .34)
+                        : rgba(Math.min(97, dL + 40), d.C, d.h, .1);
+
+  /* もれる光：扉より必ず明るく */
+  const seepL = Math.min(97, Math.max(90, dL + 30));
+  const seep  = hex(seepL, 16, 76);
+  const glowA = dL > 55 ? .5 : .3;
+  const seepGlow = rgba(seepL, 16, 76, glowA);
+
+  /* ノブ */
+  const knob = hex(k.L, k.C, k.h);
+  const knobGlow = rgba(k.L, k.C, k.h, .55);
+
+  /* 文字：背景の明るさから自動で決める */
+  const bgLum = lum(bL, b.C, b.h);
+  const goLight = bgLum < .3;
+  let tL = goLight ? 95 : 20;
+  for (let i = 0; i < 60; i++){
+    if (ratio(lum(tL, 4, b.h), bgLum) >= 6) break;
+    tL += goLight ? 1 : -1;
+    if (tL > 99 || tL < 3) break;
+  }
+  let sL = goLight ? tL - 22 : tL + 26;
+  for (let i = 0; i < 60; i++){
+    if (ratio(lum(sL, 4, b.h), bgLum) >= 4.5) break;
+    sL += goLight ? 1 : -1;
+    if (sL > 99 || sL < 3) break;
+  }
+  const entTitle = hex(tL, 4, b.h);
+  const entSub   = hex(sL, 5, b.h);
+  const entLine  = rgba(tL, 4, b.h, .34);
+
+  /* 見え方に反映 */
+  const st = $('#stage');
+  st.style.background =
+    'radial-gradient(120% 80% at 50% 62%,' + nightHi + ' 0%,' + night + ' 62%)';
+  $('#pvEyebrow').style.color = entSub;
+  $('#pvTitle').style.color = entTitle;
+  $('#pvArtist').style.color = entSub;
+  $('#pvEnter').style.color = entTitle;
+  $('#pvEnter').style.border = '1px solid ' + entLine;
+  const pd = $('#pvDoor');
+  pd.style.background = 'linear-gradient(178deg,' + doorA + ' 0%,' + doorB + ' 78%)';
+  pd.style.boxShadow = 'inset 0 0 0 1px ' + edge + ',0 14px 26px rgba(0,0,0,.5)';
+  $('#pvDent').style.border = '1px solid ' + dLine;
+  $('#pvSeep').style.background =
+    'linear-gradient(90deg,transparent,' + seep + ',transparent)';
+  $('#pvSeep').style.boxShadow = '0 0 13px 3px ' + seepGlow;
+  $('#pvKnob').style.background = knob;
+  $('#pvKnob').style.boxShadow = '0 0 7px ' + knobGlow;
+
+  $('#dv').textContent = dL >= 78 ? 'とても明るい' : dL >= 52 ? '明るい'
+                       : dL >= 26 ? '中くらい' : '暗い';
+  $('#bv').textContent = bL >= 74 ? 'とても明るい' : bL >= 46 ? '明るい'
+                       : bL >= 22 ? '中くらい' : '暗い';
+
+  /* 注意 */
+  const note = $('#note');
+  const diff = Math.abs(dL - bL);
+  if (diff < 9){
+    note.className = 'note warn';
+    note.textContent = '扉と背景の明るさが近すぎます。扉の形が見えにくくなります。';
+  } else if (bL > 68){
+    note.className = 'note warn';
+    note.textContent = '背景が明るいので、扉を開けたときの「明るい場所に入る」感じが弱くなります。';
+  } else {
+    note.className = 'note';
+    note.textContent = '扉の形と、下からもれる光が見えていればうまくいっています。';
+  }
+
+  $('#css').textContent =
+    '  --night:'      + night     + ';\n' +
+    '  --night-hi:'   + nightHi   + ';\n' +
+    '  --door-a:'     + doorA     + ';\n' +
+    '  --door-b:'     + doorB     + ';\n' +
+    '  --door-edge:'  + edge      + ';\n' +
+    '  --door-line:'  + dLine     + ';\n' +
+    '  --seep:'       + seep      + ';\n' +
+    '  --seep-glow:'  + seepGlow  + ';\n' +
+    '  --knob:'       + knob      + ';\n' +
+    '  --knob-glow:'  + knobGlow  + ';\n' +
+    '  --ent-title:'  + entTitle  + ';\n' +
+    '  --ent-sub:'    + entSub    + ';\n' +
+    '  --ent-line:'   + entLine   + ';';
+
+  refreshSwatches();
+}
+
+$('#dl').addEventListener('input', paint);
+$('#bl').addEventListener('input', paint);
+
+$('#copy').addEventListener('click', async () => {
+  const btn = $('#copy'), t = $('#css').textContent;
+  try{
+    await navigator.clipboard.writeText(t);
+  }catch(e){
+    const ta = document.createElement('textarea');
+    ta.value = t; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); ta.remove();
+  }
+  btn.textContent = 'コピーしました';
+  setTimeout(() => btn.textContent = 'この13行をコピー', 1600);
+});
+
+paint();
+</script>
+</body>
+</html>

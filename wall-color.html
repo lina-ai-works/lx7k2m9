@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>壁色えらび ／ オンライン個展テンプレート用</title>
+<style>
+:root{
+  --bg:#EFEFEB;
+  --panel:#FBFBF9;
+  --ink:#1A1F24;
+  --mute:#6B7178;
+  --line:rgba(60,68,75,.16);
+  --indigo:#2E4A63;
+  --mincho:"Hiragino Mincho ProN","Yu Mincho","YuMincho","HGS明朝E",Georgia,serif;
+  --gothic:"Hiragino Sans","Yu Gothic","YuGothic","Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:var(--gothic);
+  line-height:1.75;-webkit-font-smoothing:antialiased;
+  padding:clamp(22px,5vw,52px) clamp(16px,4vw,28px) 80px}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--indigo);outline-offset:3px}
+.wrap{max-width:880px;margin:0 auto}
+
+header{text-align:center;margin-bottom:clamp(26px,5vw,44px)}
+.eyebrow{font-family:var(--mincho);font-size:10px;letter-spacing:.4em;
+  text-indent:.4em;color:var(--mute)}
+h1{font-family:var(--mincho);font-weight:400;font-size:clamp(21px,5.4vw,30px);
+  letter-spacing:.16em;text-indent:.16em;margin:10px 0 8px}
+header p{font-size:12.5px;color:var(--mute)}
+
+/* 読み込み */
+#drop{
+  border:1px dashed rgba(60,68,75,.34);background:var(--panel);
+  padding:clamp(34px,8vw,56px) 20px;text-align:center;cursor:pointer;
+  transition:background .25s,border-color .25s;
+}
+#drop:hover,#drop.over{background:#fff;border-color:var(--indigo)}
+#drop .big{font-family:var(--mincho);font-size:clamp(14px,3.6vw,17px);
+  letter-spacing:.1em;margin-bottom:8px}
+#drop .sub{font-size:11.5px;color:var(--mute)}
+
+#result{display:none;margin-top:clamp(24px,5vw,40px)}
+#result.on{display:block}
+
+.readout{
+  display:flex;gap:18px;flex-wrap:wrap;justify-content:center;
+  font-size:11.5px;color:var(--mute);margin-bottom:20px;
+}
+.readout b{font-weight:400;color:var(--ink)}
+
+/* 候補 */
+.cands{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:10px;margin-bottom:22px}
+.cand{
+  background:var(--panel);border:1px solid var(--line);padding:14px;
+  text-align:left;transition:border-color .25s,transform .25s;
+}
+.cand:hover{border-color:rgba(60,68,75,.4)}
+.cand.on{border-color:var(--indigo);box-shadow:inset 0 0 0 1px var(--indigo)}
+.cand .sw{height:46px;margin-bottom:11px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.07)}
+.cand h3{font-family:var(--mincho);font-weight:400;font-size:14px;
+  letter-spacing:.1em;margin-bottom:5px}
+.cand p{font-size:11px;line-height:1.85;color:var(--mute)}
+.cand .hex{font-size:10.5px;letter-spacing:.08em;color:var(--mute);margin-top:8px}
+
+/* 見え方 */
+.stage{position:relative;height:clamp(240px,46vw,360px);overflow:hidden;
+  border:1px solid var(--line);margin-bottom:6px}
+.stage .wall{position:absolute;inset:0;transition:background .35s ease}
+.stage .floor{position:absolute;left:0;right:0;top:74%;bottom:0;
+  transition:background .35s ease}
+.stage .line{position:absolute;left:0;right:0;top:74%;height:1px;
+  background:rgba(40,44,48,.22)}
+.stage .art{position:absolute;left:50%;top:42%;translate:-50% -50%;
+  background:#FCFCFA;padding:9px;
+  box-shadow:0 14px 26px rgba(38,42,46,.26),0 3px 7px rgba(38,42,46,.16)}
+.stage .art img{display:block;max-height:clamp(120px,26vw,190px);
+  max-width:min(60vw,300px);width:auto;height:auto}
+.stage .cap{position:absolute;left:50%;top:76%;translate:-50% 0;
+  font-family:var(--mincho);font-size:11px;letter-spacing:.12em;
+  color:#3A4046;white-space:nowrap}
+.note{font-size:11px;color:var(--mute);text-align:center;margin-bottom:22px}
+.warn{color:#8A4A32}
+
+/* 明るさ調整 */
+.tune{background:var(--panel);border:1px solid var(--line);
+  padding:16px 18px;margin-bottom:20px}
+.tune label{display:flex;justify-content:space-between;align-items:baseline;
+  font-size:11.5px;color:var(--mute);margin-bottom:9px}
+.tune label b{font-family:var(--mincho);font-weight:400;font-size:13px;
+  letter-spacing:.1em;color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--indigo)}
+
+/* 書き出し */
+.out{background:#22282E;padding:16px 18px}
+.out .ttl{font-size:10px;letter-spacing:.3em;text-indent:.3em;
+  color:#8D99A4;margin-bottom:11px}
+pre{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;
+  line-height:1.95;color:#DDE4EA;white-space:pre-wrap;word-break:break-all}
+.copy{margin-top:13px;font-size:11.5px;letter-spacing:.14em;color:#DDE4EA;
+  border:1px solid rgba(221,228,234,.34);padding:9px 18px;transition:background .25s}
+.copy:hover{background:rgba(221,228,234,.1)}
+.how{font-size:11.5px;color:var(--mute);margin-top:14px;line-height:2}
+.how code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;
+  background:rgba(60,68,75,.09);padding:1px 5px}
+canvas{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">WALL COLOR</div>
+  <h1>壁の色をえらぶ</h1>
+  <p>作品を1枚入れると、その作品が映える壁の色を出します。</p>
+</header>
+
+<div id="drop">
+  <div class="big">作品の画像をここに落とす</div>
+  <div class="sub">タップで選ぶこともできます　／　画像はこの中だけで処理されます</div>
+  <input type="file" id="file" accept="image/*" hidden>
+</div>
+
+<div id="result">
+  <div class="readout">
+    <span>作品の明るさ <b id="rL">—</b></span>
+    <span>色み <b id="rH">—</b></span>
+    <span>鮮やかさ <b id="rC">—</b></span>
+  </div>
+
+  <div class="cands" id="cands"></div>
+
+  <div class="stage">
+    <div class="wall" id="pvWall"></div>
+    <div class="floor" id="pvFloor"></div>
+    <div class="line"></div>
+    <div class="art"><img id="pvImg" alt=""></div>
+    <div class="cap">作品タイトル</div>
+  </div>
+  <div class="note" id="note"></div>
+
+  <div class="tune">
+    <label><b>壁の明るさ</b><span id="tuneVal"></span></label>
+    <input type="range" id="tune" min="70" max="93" value="82">
+  </div>
+
+  <div class="out">
+    <div class="ttl">index.html の冒頭に貼る</div>
+    <pre id="css"></pre>
+    <button class="copy" id="copy">この5行をコピー</button>
+  </div>
+
+  <div class="how">
+    <code>index.html</code> の上のほう、<code>:root{</code> の中にある同じ名前の行を、
+    この5行で置き換えてください。<br>
+    上書き保存して <code>F5</code> を押すと、壁の色が変わります。
+  </div>
+</div>
+
+</div>
+
+<canvas id="cv"></canvas>
+
+<script>
+const $ = s => document.querySelector(s);
+
+/* ---------- 色の変換（sRGB ⇄ Lab ⇄ LCh） ---------- */
+const D65 = [95.047, 100, 108.883];
+const lin = c => (c /= 255) <= .04045 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4);
+const unlin = c => {
+  c = c <= .0031308 ? c * 12.92 : 1.055 * Math.pow(c, 1 / 2.4) - .055;
+  return Math.round(Math.min(1, Math.max(0, c)) * 255);
+};
+function rgb2lab(r, g, b){
+  const R = lin(r), G = lin(g), B = lin(b);
+  const x = (R*.4124 + G*.3576 + B*.1805) * 100 / D65[0];
+  const y = (R*.2126 + G*.7152 + B*.0722) * 100 / D65[1];
+  const z = (R*.0193 + G*.1192 + B*.9505) * 100 / D65[2];
+  const f = t => t > .008856 ? Math.cbrt(t) : (7.787 * t) + 16/116;
+  const fx = f(x), fy = f(y), fz = f(z);
+  return [116*fy - 16, 500*(fx - fy), 200*(fy - fz)];
+}
+function lab2rgb(L, a, bb){
+  const fy = (L + 16) / 116, fx = fy + a / 500, fz = fy - bb / 200;
+  const g = t => t*t*t > .008856 ? t*t*t : (t - 16/116) / 7.787;
+  const x = g(fx) * D65[0] / 100, y = g(fy) * D65[1] / 100, z = g(fz) * D65[2] / 100;
+  const R =  x*3.2406 + y*-1.5372 + z*-0.4986;
+  const G =  x*-0.9689 + y*1.8758 + z*0.0415;
+  const B =  x*0.0557 + y*-0.2040 + z*1.0570;
+  return [unlin(R), unlin(G), unlin(B)];
+}
+const lch2hex = (L, C, h) => {
+  const r = h * Math.PI / 180;
+  const [R, G, B] = lab2rgb(L, C * Math.cos(r), C * Math.sin(r));
+  return '#' + [R, G, B].map(v => v.toString(16).padStart(2, '0')).join('').toUpperCase();
+};
+
+/* ---------- 画像を読む ---------- */
+const drop = $('#drop'), fileIn = $('#file'), cv = $('#cv'), ctx = cv.getContext('2d', { willReadFrequently:true });
+let art = null;   // { L, C, h }
+
+drop.addEventListener('click', () => fileIn.click());
+fileIn.addEventListener('change', e => { if (e.target.files[0]) load(e.target.files[0]); });
+['dragenter','dragover'].forEach(t => drop.addEventListener(t, e => {
+  e.preventDefault(); drop.classList.add('over');
+}));
+['dragleave','drop'].forEach(t => drop.addEventListener(t, e => {
+  e.preventDefault(); drop.classList.remove('over');
+}));
+drop.addEventListener('drop', e => {
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) load(f);
+});
+
+function load(file){
+  const fr = new FileReader();
+  fr.onload = () => {
+    const img = new Image();
+    img.onload = () => { $('#pvImg').src = img.src; analyse(img); };
+    img.src = fr.result;
+  };
+  fr.readAsDataURL(file);
+}
+
+/* ---------- 作品を測る ---------- */
+function analyse(img){
+  const N = 150;
+  const s = Math.min(N / img.width, N / img.height, 1);
+  cv.width = Math.max(1, Math.round(img.width * s));
+  cv.height = Math.max(1, Math.round(img.height * s));
+  ctx.drawImage(img, 0, 0, cv.width, cv.height);
+  const d = ctx.getImageData(0, 0, cv.width, cv.height).data;
+
+  let sumL = 0, n = 0, wa = 0, wb = 0, wsum = 0, sumC = 0;
+  for (let i = 0; i < d.length; i += 4){
+    if (d[i+3] < 20) continue;
+    const [L, a, b] = rgb2lab(d[i], d[i+1], d[i+2]);
+    const C = Math.hypot(a, b);
+    sumL += L; sumC += C; n++;
+    // 色みは、鮮やかな画素ほど強く効かせる（灰色に引きずられないように）
+    const w = C * C;
+    wa += a * w; wb += b * w; wsum += w;
+  }
+  if (!n) return;
+
+  const L = sumL / n;
+  const C = sumC / n;
+  const h = wsum > 0 ? (Math.atan2(wb / wsum, wa / wsum) * 180 / Math.PI + 360) % 360 : 0;
+  art = { L, C, h };
+
+  $('#rL').textContent = L >= 68 ? '明るい' : L >= 46 ? '中くらい' : '暗い';
+  $('#rH').textContent = hueName(h, C);
+  $('#rC').textContent = C >= 34 ? 'あざやか' : C >= 16 ? 'おだやか' : 'ほぼ無彩色';
+
+  // 壁の明るさの初期値：暗い作品には明るい壁、明るい作品には少し落とした壁
+  let t = L < 55 ? 86 : Math.min(88, Math.max(74, L - 12));
+  $('#tune').value = Math.round(t);
+
+  $('#result').classList.add('on');
+  build();
+  $('#result').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function hueName(h, C){
+  if (C < 8) return '無彩色に近い';
+  const names = [[15,'赤'],[45,'橙'],[75,'黄'],[150,'緑'],[200,'青緑'],[260,'青'],[310,'紫'],[345,'赤紫'],[360,'赤']];
+  for (const [d, nm] of names) if (h <= d) return nm;
+  return '赤';
+}
+
+/* ---------- 壁の候補 ---------- */
+let picked = 0;
+const RECIPES = [
+  { key:'調和',   dh:0,   C:8,
+    text:'作品と同じ色みを、うんと薄くした壁。全体が静かにまとまります。世界観を見せたいとき。' },
+  { key:'引き立て', dh:180, C:7,
+    text:'作品と反対の色みを、わずかに含んだ壁。作品の色が冴えて見えます。一点を強く見せたいとき。' },
+  { key:'中立',   dh:0,   C:2.5,
+    text:'色みをほとんど持たない壁。美術館に近い見え方です。作風がばらついているときに安全。' }
+];
+
+function wallSet(i, L){
+  const r = RECIPES[i];
+  const h = (art.h + r.dh + 360) % 360;
+  return {
+    wall:   lch2hex(L, r.C, h),
+    hi:     lch2hex(Math.min(96, L + 5), r.C * .8, h),
+    dk:     lch2hex(Math.max(30, L - 9), r.C * .9, h),
+    floor:  lch2hex(Math.max(30, L - 26), r.C * .75, h),
+    floorDk:lch2hex(Math.max(24, L - 34), r.C * .7, h)
+  };
+}
+
+function build(){
+  const cands = $('#cands');
+  cands.innerHTML = '';
+  RECIPES.forEach((r, i) => {
+    const L = +$('#tune').value;
+    const set = wallSet(i, L);
+    const b = document.createElement('button');
+    b.className = 'cand' + (i === picked ? ' on' : '');
+    b.innerHTML =
+      '<div class="sw" style="background:' + set.wall + '"></div>' +
+      '<h3>' + r.key + '</h3><p>' + r.text + '</p>' +
+      '<div class="hex">' + set.wall + '</div>';
+    b.addEventListener('click', () => { picked = i; build(); });
+    cands.appendChild(b);
+  });
+  paint();
+}
+
+function paint(){
+  const L = +$('#tune').value;
+  const set = wallSet(picked, L);
+  $('#pvWall').style.background =
+    'linear-gradient(180deg,' + set.hi + ' 0%,' + set.wall + ' 46%,' + set.dk + ' 74%)';
+  $('#pvFloor').style.background =
+    'linear-gradient(180deg,' + set.floorDk + ' 0%,' + set.floor + ' 40%,' + set.floorDk + ' 100%)';
+  $('#tuneVal').textContent = L >= 90 ? 'かなり明るい' : L >= 84 ? '明るい' : L >= 78 ? '中くらい' : '落ち着いた';
+
+  const note = $('#note');
+  if (L > 91){
+    note.className = 'note warn';
+    note.textContent = '壁が明るすぎます。白い額縁が壁に溶けて、作品が浮かなくなります。';
+  } else if (art && Math.abs(L - art.L) < 5){
+    note.className = 'note warn';
+    note.textContent = '作品と壁の明るさが近すぎます。作品が壁に沈んで見えます。';
+  } else {
+    note.className = 'note';
+    note.textContent = '額縁の白がはっきり見えていれば、作品はきちんと浮きます。';
+  }
+
+  $('#css').textContent =
+    '  --wall:'      + set.wall    + ';\n' +
+    '  --wall-hi:'   + set.hi      + ';\n' +
+    '  --wall-dk:'   + set.dk      + ';\n' +
+    '  --floor:'     + set.floor   + ';\n' +
+    '  --floor-dk:'  + set.floorDk + ';';
+}
+
+$('#tune').addEventListener('input', paint);
+
+$('#copy').addEventListener('click', async () => {
+  const btn = $('#copy'), t = $('#css').textContent;
+  try{
+    await navigator.clipboard.writeText(t);
+  }catch(e){
+    const ta = document.createElement('textarea');
+    ta.value = t; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); ta.remove();
+  }
+  btn.textContent = 'コピーしました';
+  setTimeout(() => btn.textContent = 'この5行をコピー', 1600);
+});
+</script>
+</body>
+</html>
