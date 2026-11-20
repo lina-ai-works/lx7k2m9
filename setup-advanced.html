@@ -81,15 +81,71 @@ textarea{resize:vertical;min-height:84px;line-height:1.9}
 .works{margin-top:12px}
 .work{border-top:1px dashed var(--line);padding-top:12px;margin-top:12px}
 .work:first-child{border-top:0;padding-top:0;margin-top:0}
+/* 部屋ごとの壁 */
+.rcbox{border-top:1px dashed var(--line);padding-top:12px;margin-top:14px}
+.rcbox textarea{min-height:76px;font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:12px;line-height:1.7}
 .file{display:inline-block;font-family:ui-monospace,Menlo,Consolas,monospace;
   font-size:11px;background:rgba(60,68,75,.08);padding:2px 7px;margin-right:6px}
 .addrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+/* 画像の種類と、動画のチェック */
+.extrow{display:flex;flex-wrap:wrap;gap:16px;align-items:center;
+  font-size:12.5px;margin-bottom:16px;padding:10px 12px;
+  background:rgba(60,68,75,.05);border:1px solid var(--line)}
+.extrow b{font-weight:400}
+.extrow label{display:inline-flex;align-items:center;gap:6px;margin:0;cursor:pointer}
+.extrow input{accent-color:var(--indigo)}
+.vrow{display:inline-flex;align-items:center;gap:6px;margin:0 0 14px;
+  font-size:11.5px;color:var(--mute);cursor:pointer}
+.vrow input{accent-color:var(--indigo)}
+
 
 /* 色を貼るところ */
 .paste textarea{min-height:120px;font-family:ui-monospace,Menlo,Consolas,monospace;
   font-size:12px;line-height:1.8}
+/* どれを使うか選ぶところ */
+.pick{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:16px;
+  padding:11px 13px;background:rgba(60,68,75,.05);border:1px solid var(--line)}
+.pick label{display:inline-flex;align-items:center;gap:6px;margin:0;
+  font-size:13px;cursor:pointer}
+.pick input{accent-color:var(--indigo)}
+.wm[hidden]{display:none}
+
+/* つまみ */
+.rng{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:12px}
+.rng span{width:72px;color:var(--mute)}
+.rng input[type=range]{flex:1;accent-color:var(--indigo)}
+.rng b{width:46px;text-align:right;font-weight:400;
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}
+.rng b.wide{width:72px}
+.rng span.grow{width:auto;flex:1}
+.rng input[type=color]{width:58px;height:30px;padding:2px;border:1px solid var(--line);
+  background:#fff;cursor:pointer;flex:0 0 auto}
+
+/* 見え方のたしかめ */
+.pv2{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-top:14px}
+.pvbox{position:relative;overflow:hidden;background:#15161A;
+  border:1px solid var(--line);flex:0 0 auto}
+.pvbox.pc{width:300px;height:188px}
+.pvbox.sp{width:104px;height:225px}
+@media (max-width:520px){.pvbox.pc{width:100%;max-width:300px;height:auto;aspect-ratio:8/5}}
+.pvbox i{position:absolute;top:0;bottom:0;background-repeat:no-repeat;display:block}
+.pvbox i.l{left:0}
+.pvbox i.r{right:0}
+.pvbox u{position:absolute;background:#FBFBF9;
+  box-shadow:0 3px 8px rgba(0,0,0,.4);text-decoration:none}
+.pvbox .tile{position:absolute;inset:0;background-repeat:repeat}
+.pvcap{font-size:11px;color:var(--mute);margin-top:5px}
+.pvnote{font-size:11.5px;color:var(--mute);line-height:1.9}
+.need{background:#FFF6E8;border:1px solid #E2C79A;padding:10px 12px;
+  font-size:11.5px;line-height:1.9;color:#6B4E27;margin-top:10px}
 .ok{font-size:11.5px;color:#2E6348;margin-top:6px}
 .ng{font-size:11.5px;color:#8A4A32;margin-top:6px}
+#optMsg{font-size:11.5px;margin-top:8px;min-height:1.2em}
+.opt[hidden]{display:none !important}
+.work textarea.wg,#dm-size textarea{min-height:56px;
+  font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:11.5px;line-height:1.6;white-space:pre}
 
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:10;
   background:rgba(239,239,235,.94);backdrop-filter:blur(6px);
@@ -120,7 +176,7 @@ textarea{resize:vertical;min-height:84px;line-height:1.9}
 <header>
   <div class="eyebrow">ADVANCED</div>
   <h1>かんたん設定（応用編）</h1>
-  <p>部屋も作品数も、壁と入口の色も、ここで決められます。</p>
+  <p>部屋も作品も増やせます。オプションは、キーワードを入れると出てきます。</p>
 </header>
 
 <div class="check">
@@ -135,6 +191,33 @@ textarea{resize:vertical;min-height:84px;line-height:1.9}
   いまお使いの <b>index.html</b> を読み込むと、入力欄に前の内容が入ります。
   <button class="loadbtn" id="loadBtn">index.html を読み込む</button>
 </div>
+
+<section id="useSec">
+  <h2>この展示室の使い方</h2>
+  <div class="pick">
+    <label><input type="radio" name="usemode" value="solo" checked> ひとりの展示（扉から入ります）</label>
+    <label><input type="radio" name="usemode" value="group"> 合同展に参加する（ロビーから入ります）</label>
+  </div>
+  <div id="um-group" hidden>
+    <label><span class="t"><b>ロビーのURL</b>　主催の方からお知らせがあります</span>
+      <input type="text" id="lobbyUrl" placeholder="https://..."></label>
+    <p class="hint">
+      合同展のときは、入口の扉は出ません。ロビーから入ってくるためです。<br>
+      代わりに、左上に「ロビーへ」のボタンが出ます。
+    </p>
+  </div>
+</section>
+
+<section class="paste" id="optSec">
+  <h2>オプションをお持ちの方</h2>
+  <p class="hint">
+    お渡しした<b>キーワード</b>を入れると、その設定欄が出てきます。<br>
+    いくつかお持ちの方は、<b>スペースで区切って</b>並べて入れてください。<br>
+    お持ちでない方は、空のままで大丈夫です。
+  </p>
+  <input type="text" id="optKey" placeholder="例： yuragi link" autocomplete="off">
+  <div id="optMsg"></div>
+</section>
 
 <section>
   <h2>① あなたのこと</h2>
@@ -168,39 +251,202 @@ textarea{resize:vertical;min-height:84px;line-height:1.9}
   <p class="hint">
     部屋も作品も、増やしたり減らしたりできます。<br>
     <b>ファイル名は自動でつけ直されます。</b>画像はその名前で用意してください。<br>
-    <b>増やすときは、うしろの部屋から</b>。前の部屋を増やすと、うしろの番号がずれます。
+    <b>増やすときは、うしろの部屋から</b>。前の部屋を増やすと、うしろの番号がずれます。<br>
+    ファイル名は<b>すべて小文字</b>です。<code>.PNG</code> や <code>Art01</code> では表示されません。<br>
+    部屋ごとに<b>壁を変えられます</b>。それぞれの部屋の下に、④で選んだ形の欄が出ます。<br>
+    プロフィールの部屋は、<b>いちばん最後の部屋と同じ壁</b>になります。
   </p>
+  <div class="extrow">
+    <b>画像の種類</b>
+    <label><input type="radio" name="ext" value=".png" checked> png</label>
+    <label><input type="radio" name="ext" value=".jpg"> jpg</label>
+    <span style="color:var(--mute);font-size:11.5px">作品はすべて同じ種類にそろえてください</span>
+  </div>
   <div id="rooms"></div>
-  <div class="addrow">
+  <div class="addrow" id="addRoomRow">
     <button class="mini" id="addRoom">＋ 部屋を増やす</button>
   </div>
 </section>
 
-<section class="paste">
-  <h2>④ 壁の色</h2>
-  <p class="hint">
-    <b>壁色ツール</b>で出てきた5行を、そのまま貼り付けてください。<br>
-    空のままなら、もとの色のままになります。
-  </p>
-  <textarea id="wallCss" placeholder="--wall:#E5E7E2;&#10;--wall-hi:#F2F3EF;&#10;--wall-dk:#D8DAD5;&#10;--floor:#A9A69D;&#10;--floor-dk:#8E8B83;"></textarea>
-  <div id="wallMsg"></div>
+<section class="paste" id="wallSec">
+  <h2>④ 壁</h2>
+  <div class="pick">
+    <label><input type="radio" name="wallmode" value="color" checked> 色で決める</label>
+    <label class="opt" data-opt="kabe" hidden><input type="radio" name="wallmode" value="scene"> 自分の絵を使う</label>
+    <label class="opt" data-opt="kabe" hidden><input type="radio" name="wallmode" value="pattern"> 自分の柄を使う</label>
+  </div>
+
+  <div class="wm" id="wm-color">
+    <p class="hint" id="wallCssHint">
+      <b>壁色ツール</b>で出てきた5行を、そのまま貼り付けてください。<br>
+      空のままなら、もとの色のままになります。
+    </p>
+    <textarea id="wallCss" placeholder="--wall:#E5E7E2;&#10;--wall-hi:#F2F3EF;&#10;--wall-dk:#D8DAD5;&#10;--floor:#A9A69D;&#10;--floor-dk:#8E8B83;"></textarea>
+    <div id="wallMsg"></div>
+    <label class="vrow"><input type="checkbox" id="wallDark"> 暗い色です（文字を明るくします）</label>
+  </div>
+
+  <div class="wm" id="wm-scene" hidden>
+    <p class="hint">
+      左右に飾りがあって、<b>真ん中が空いている縦長の絵</b>を1枚ご用意ください。<br>
+      左右の飾りは画面の端に止まり、<b>真ん中だけが横に伸びます</b>。<br>
+      作品を飾る場所なので、真ん中は模様の少ないほうがきれいです。<br>
+      <b>左右に飾りがない絵</b>のときは、両方とも 0% にしてください。
+      絵をそのまま画面いっぱいに広げます（横長の画面では、上下が少し切れます）。
+    </p>
+    <label><span class="t"><b>ファイル名</b>　この名前で、index.html と同じ場所に置きます</span>
+      <input type="text" id="sceneFile" value="wall.png"></label>
+    <button class="mini" id="scenePick">絵を選んで、見え方をたしかめる</button>
+    <div class="rng"><span>左の飾り</span>
+      <input type="range" id="sceneL" min="0" max="45" step="1" value="30"><b id="sceneLv">30%</b></div>
+    <div class="rng"><span>右の飾り</span>
+      <input type="range" id="sceneR" min="0" max="45" step="1" value="20"><b id="sceneRv">20%</b></div>
+    <label class="vrow"><input type="checkbox" id="sceneDark"> 暗い絵です（文字を明るくします）</label>
+    <div class="pv2">
+      <div><div class="pvbox pc" id="pvPc"></div><div class="pvcap">パソコン</div></div>
+      <div><div class="pvbox sp" id="pvSp"></div><div class="pvcap">スマホ</div></div>
+      <div class="pvnote" style="flex:1;min-width:160px">
+        白い四角が作品です。実際に並ぶ大きさで出しています。<br>
+        飾りに隠れないところまで、つまみで調整してください。
+      </div>
+    </div>
+    <div class="need" id="sceneNeed">まだ絵を選んでいません。「絵を選んで、見え方をたしかめる」を押してください。
+      （選んだ絵はこの画面で見るだけで、どこにも送られません）</div>
+  </div>
+
+  <div class="wm" id="wm-pattern" hidden>
+    <p class="hint">
+      ドットや模様のように、<b>すきまなく並ぶ絵</b>を1枚ご用意ください。<br>
+      壁いっぱいにくり返して並びます。<b>床の色は、ここで選びます</b>（壁色ツールは使いません）。
+    </p>
+    <label><span class="t"><b>ファイル名</b>　この名前で、index.html と同じ場所に置きます</span>
+      <input type="text" id="patFile" value="wall.png"></label>
+    <button class="mini" id="patPick">柄を選んで、見え方をたしかめる</button>
+    <div class="rng"><span>大きさ</span>
+      <input type="range" id="patSize" min="60" max="520" step="10" value="240"><b id="patSizev">240</b></div>
+    <div class="rng"><span>床の色</span>
+      <input type="color" id="patFloor" value="#A9A69D">
+      <span class="grow"></span><b class="wide" id="patFloorV">#A9A69D</b></div>
+    <label class="vrow"><input type="checkbox" id="patDark"> 暗い柄です（文字を明るくします）</label>
+    <div class="pv2">
+      <div><div class="pvbox pc" id="pvPatPc"></div><div class="pvcap">パソコン</div></div>
+      <div><div class="pvbox sp" id="pvPatSp"></div><div class="pvcap">スマホ</div></div>
+      <div class="pvnote" style="flex:1;min-width:160px">
+        つなぎ目が線になって見えるときは、<br>すきまなく並ぶ絵になっていません。
+      </div>
+    </div>
+    <div class="need" id="patNeed">まだ柄を選んでいません。「柄を選んで、見え方をたしかめる」を押してください。</div>
+  </div>
 </section>
 
-<section class="paste">
-  <h2>⑤ 入口の色</h2>
+<section class="paste" id="entSec">
+  <h2>⑤ 入口</h2>
+  <div class="pick">
+    <label><input type="radio" name="entmode" value="color" checked> 色で決める</label>
+    <label class="opt" data-opt="iriguchi" hidden><input type="radio" name="entmode" value="image"> 自分の絵を使う</label>
+  </div>
+
+  <div class="em" id="em-color">
+    <p class="hint">
+      <b>入口の色ツール</b>で出てきた13行を、そのまま貼り付けてください。<br>
+      空のままなら、もとの色のままになります。
+    </p>
+    <textarea id="entCss" placeholder="--night:#0E1319;&#10;--night-hi:#1A222B;&#10;--door-a:#2B2118;&#10;…"></textarea>
+    <div id="entMsg"></div>
+  </div>
+
+  <div class="em" id="em-image" hidden>
+    <p class="hint">
+      入口の絵を1枚ご用意ください。扉の絵は出なくなります。<br>
+      <b>縦長</b>で、上と下が少し空いていると、タイトルとENTERが重なりません。
+    </p>
+    <label><span class="t"><b>ファイル名</b>　この名前で、index.html と同じ場所に置きます</span>
+      <input type="text" id="entFile" value="gate.png"></label>
+    <button class="mini" id="entPick">絵を選んで、見え方をたしかめる</button>
+    <div class="pv2">
+      <div><div class="pvbox pc" id="pvEntPc"></div><div class="pvcap">パソコン</div></div>
+      <div><div class="pvbox sp" id="pvEntSp"></div><div class="pvcap">スマホ</div></div>
+    </div>
+    <div class="need" id="entNeed">まだ絵を選んでいません。「絵を選んで、見え方をたしかめる」を押してください。</div>
+
+    <div class="opt" data-opt="yuragi" hidden>
+      <p class="hint"><b>ゆらぎ</b>　ゆらぎツールの書き出しを、そのまま貼り付けてください。
+        この絵の上で、光が揺れます。</p>
+      <textarea id="entGlow" placeholder="const GLOW_MODE = &quot;always&quot;;&#10;&#10;const GLOWS = [&#10;  { x:51, y:58, size:7, power:100, tone:&quot;warm&quot;, motion:&quot;flicker&quot;, speed:3.4 }&#10;];"></textarea>
+      <div class="gmsg" id="entGlowMsg"></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>⑥ 部屋の両端の飾り</h2>
   <p class="hint">
-    <b>入口の色ツール</b>で出てきた13行を、そのまま貼り付けてください。<br>
-    空のままなら、もとの色のままになります。
+    部屋に入ったところと、奥の端に、飾りを置けます。<br>
+    同時に画面に出ないので、作品の場所が狭くなりません。<br>
+    <b>使わないままでも大丈夫です。</b>
   </p>
-  <textarea id="entCss" placeholder="--night:#0E1319;&#10;--night-hi:#1A222B;&#10;--door-a:#2B2118;&#10;…"></textarea>
-  <div id="entMsg"></div>
+  <div class="pick">
+    <label><input type="radio" name="decomode" value="none" checked> 使わない</label>
+    <label><input type="radio" name="decomode" value="ready"> 用意された飾りを使う</label>
+    <label><input type="radio" name="decomode" value="own"> 自分の飾りを使う</label>
+  </div>
+
+  <div class="dm" id="dm-ready" hidden>
+    <label><span class="t"><b>どの飾りにしますか</b></span>
+      <select id="decoSet"></select></label>
+    <p class="hint">用意された飾りは、置かれている場所から読み込まれます。
+      ご自分でアップロードする必要はありません。</p>
+  </div>
+
+  <div class="dm" id="dm-own" hidden>
+    <p class="hint">
+      <b>背景が透明なPNG</b>をご用意ください。縦長（600×1400pxくらい）、1枚300KB以下。<br>
+      背景が白いままだと、白い帯が出てしまいます。<br>
+      片方だけでも大丈夫です。空にすると、その側には出ません。
+    </p>
+    <div class="two">
+      <label><span class="t"><b>左の飾り</b>　ファイル名</span>
+        <input type="text" id="decoL" placeholder="deco-left.png"></label>
+      <label><span class="t"><b>右の飾り</b>　ファイル名</span>
+        <input type="text" id="decoR" placeholder="deco-right.png"></label>
+    </div>
+  </div>
+
+  <div class="dm" id="dm-size" hidden>
+    <div class="rng"><span>大きさ</span>
+      <input type="range" id="decoH" min="25" max="95" step="1" value="62"><b id="decoHv">62%</b></div>
+    <div class="rng"><span>上下の位置</span>
+      <input type="range" id="decoY" min="-200" max="200" step="5" value="0"><b id="decoYv">0px</b></div>
+
+    <div class="opt" data-opt="yuragi" hidden>
+      <p class="hint"><b>ゆらぎ</b>　飾りの上にも光を置けます。左右それぞれ貼り付けてください。</p>
+      <div class="two">
+        <label><span class="t">左の飾りのゆらぎ</span>
+          <textarea id="decoGlowL" placeholder="ゆらぎツールの書き出し"></textarea></label>
+        <label><span class="t">右の飾りのゆらぎ</span>
+          <textarea id="decoGlowR" placeholder="ゆらぎツールの書き出し"></textarea></label>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="opt" data-opt="ga4" hidden>
+  <h2>⑦ 見られた数をはかる（GA4）</h2>
+  <p class="hint">
+    Googleアナリティクスの<b>測定ID</b>を入れると、
+    何人来たか、どの作品が拡大されたか、投稿へ何回飛んだかが分かります。<br>
+    空のままなら、何も計測しません。
+  </p>
+  <label><span class="t"><b>測定ID</b>　G- ではじまる文字列</span>
+    <input type="text" id="gaId" placeholder="G-XXXXXXXXXX" autocomplete="off"></label>
 </section>
 
 <div class="after">
   <b>このあとの流れ</b><br>
   1. 下の「ファイルを作る」を押すと <code>index.html</code> ができます<br>
-  2. 画像を、画面に出ている名前（<code>art01.png</code> など）にします<br>
-  3. GitHub に <code>index.html</code> と画像をまとめてアップロードします
+  2. 画像を、画面に出ている名前（<code id="lastFile">art01.png</code> など）にします<br>
+  3. 壁や入口に自分の絵を使うときは、その絵も同じ場所に置きます<br>
+  4. GitHub に <code>index.html</code> と画像をまとめてアップロードします
 </div>
 
 </div>
@@ -273,6 +519,20 @@ img{display:block}
   transition:opacity .5s var(--ease),visibility .5s;
 }
 #entrance.gone{opacity:0;visibility:hidden}
+
+/* 合同展のときだけ出る、ロビーへ戻るボタン */
+.lobby-btn{position:fixed;z-index:24;display:none;
+  left:calc(12px + env(safe-area-inset-left));
+  top:calc(12px + env(safe-area-inset-top));
+  align-items:center;gap:6px;
+  padding:9px 16px;border-radius:999px;
+  background:rgba(22,24,27,.52);border:1px solid rgba(255,255,255,.42);
+  color:#FBFBF9;font-family:var(--gothic);font-size:12px;letter-spacing:.08em;
+  text-decoration:none;
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+  transition:background .25s,border-color .25s}
+.lobby-btn::before{content:"←";font-size:11px;opacity:.9}
+.lobby-btn:hover{background:rgba(214,176,112,.34);border-color:#fff}
 .ent-eyebrow{
   font-family:var(--mincho);font-size:11px;letter-spacing:.42em;
   color:var(--ent-sub);text-indent:.42em;
@@ -314,6 +574,99 @@ img{display:block}
   transition:background .3s,border-color .3s;
 }
 .enter:hover{background:rgba(140,140,140,.16);border-color:var(--ent-title)}
+
+/* ---------- 自分の絵の壁（左右の飾りは端に固定、真ん中だけ伸びます） ---------- */
+.scene-l,.scene-r,.scene-m{
+  position:absolute;top:0;bottom:0;z-index:1;pointer-events:none;
+  background-image:var(--wall-url);background-repeat:no-repeat;
+}
+.scene-l{left:0;width:var(--vis-l);background-size:var(--wall-w) 100%;background-position:left center}
+.scene-r{right:0;width:var(--vis-r);background-size:var(--wall-w) 100%;background-position:right center}
+.scene-m{left:var(--vis-l);right:var(--vis-r);
+  background-size:var(--mid-w) 100%;background-position:var(--mid-x) center}
+/* 左右の飾りが0％のときは、絵をそのまま画面いっぱいに広げます */
+.room.cover .scene-m{left:0;right:0;background-size:cover;background-position:center}
+body.wall-scene .room.cover .wall{padding-left:var(--edge);padding-right:var(--edge)}
+body.wall-scene .room.cover .plate{left:var(--edge)}
+body.wall-scene .room{background:var(--room-bg,#15161A)}
+/* 壁の絵が見つからない部屋は、ふつうの色の壁に戻します（真っ暗にしないため） */
+body.wall-scene .room.nowall{
+  background:linear-gradient(180deg,var(--wall-hi) 0%,var(--wall) 46%,var(--wall-dk) var(--horizon))}
+body.wall-scene .room.nowall::before,
+body.wall-scene .room.nowall::after{display:block}
+body.wall-scene .room.nowall .wall{padding-left:var(--edge);padding-right:var(--edge)}
+body.wall-scene .room.nowall .plate{left:var(--edge)}
+body.wall-scene .room::before,body.wall-scene .room::after{display:none}
+body.wall-scene .wall{padding-left:calc(var(--vis-l) + 14px);padding-right:calc(var(--vis-r) + 14px)}
+body.wall-scene .plate{left:calc(var(--vis-l) + 14px)}
+body.wall-scene .profile-room .wall{
+  padding-left:16px;padding-right:16px;transform:none}
+/* 絵の壁のときは、下のナビに床の色を敷けないので、ボタン自身を浮かせます */
+body.wall-scene #nav{background:none}
+body.wall-scene .navbtn{
+  background:rgba(252,251,249,.84);backdrop-filter:blur(3px);
+  border-color:rgba(60,68,75,.26);box-shadow:0 2px 9px rgba(0,0,0,.28)}
+body.wall-scene .dots{
+  padding:9px 13px;border-radius:999px;
+  background:rgba(252,251,249,.84);backdrop-filter:blur(3px);
+  box-shadow:0 2px 9px rgba(0,0,0,.28)}
+body.wall-scene.dark-room .navbtn{
+  background:rgba(20,18,24,.68);color:#EDE6DA;border-color:rgba(237,230,218,.3)}
+body.wall-scene.dark-room .dots{background:rgba(20,18,24,.68)}
+body.wall-scene .profile-room .card{
+  max-width:min(560px, calc(100vw - 32px));
+  max-height:calc(100% - 150px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  overflow-y:auto;overscroll-behavior:contain}
+
+/* ---------- 自分の柄の壁（くり返します） ---------- */
+.pattern{
+  position:absolute;left:0;right:0;top:0;height:var(--horizon);z-index:1;pointer-events:none;
+  background-image:var(--wall-url);background-repeat:repeat;
+  background-size:var(--pat) auto;
+  background-position:calc(var(--pan,0px) * .4) 0;
+}
+
+/* ---------- 暗い部屋では、文字を明るくします ---------- */
+.room.dark .tag{color:#B3A99E}
+.room.dark .tag b{color:#EDE6DA}
+.room.dark .exit{color:#B3A99E}
+.room.dark .exit .arch{
+  background:linear-gradient(180deg,#0B080D,#171019);
+  box-shadow:inset 0 0 0 1px rgba(255,220,170,.2),0 0 26px rgba(255,200,130,.12)}
+body.dark-room #nav{background:linear-gradient(180deg,transparent,rgba(12,10,14,.82) 55%)}
+body.dark-room .navbtn{color:#EDE6DA;border-color:rgba(237,230,218,.3)}
+body.dark-room .navbtn:hover{background:rgba(237,230,218,.1)}
+body.dark-room .dots i{background:rgba(237,230,218,.32)}
+body.dark-room .dots i.on{background:#EDE6DA}
+body.dark-room #bgm{background:rgba(20,16,24,.66);border-color:rgba(237,230,218,.24);color:#EDE6DA}
+body.dark-room #bgm.playing{background:#EDE6DA;color:#1A1418;border-color:#EDE6DA}
+
+/* ---------- 入口を自分の絵にするとき ---------- */
+body.ent-image #entrance{
+  background:var(--ent-url) center/cover no-repeat,
+             radial-gradient(120% 80% at 50% 62%,var(--night-hi) 0%,var(--night) 62%);
+}
+body.ent-image #entrance::before{
+  content:"";position:absolute;inset:0;
+  background:
+    linear-gradient(180deg,rgba(10,9,12,.6) 0%,rgba(10,9,12,.12) 26%,transparent 42%),
+    linear-gradient(0deg,rgba(10,9,12,.68) 0%,rgba(10,9,12,.16) 24%,transparent 40%);
+}
+body.ent-image #entrance > *{position:relative;z-index:1}
+/* 絵が主役になるように、文字を上、ENTERを下に置きます */
+body.ent-image #entrance{
+  justify-content:flex-start;gap:10px;
+  padding-top:calc(clamp(26px,6vh,62px) + env(safe-area-inset-top));
+  padding-bottom:calc(clamp(26px,7vh,66px) + env(safe-area-inset-bottom));
+}
+body.ent-image .enter{margin-top:auto}
+body.ent-image .door{display:none}
+body.ent-image .ent-title,body.ent-image .ent-eyebrow,body.ent-image .ent-artist{
+  text-shadow:0 2px 16px rgba(0,0,0,.7),0 0 4px rgba(0,0,0,.45)}
+body.ent-image .ent-eyebrow,body.ent-image .ent-artist{color:#DAD4CB}
+body.ent-image .enter{
+  background:rgba(14,12,18,.36);backdrop-filter:blur(3px);
+  border-color:rgba(244,240,232,.46)}
 
 /* ---------- 白フェード ---------- */
 #flash{position:fixed;inset:0;z-index:50;background:#fff;opacity:0;pointer-events:none;
@@ -388,6 +741,34 @@ img{display:block}
 }
 .ghost b{font-family:var(--gothic);font-size:12px;letter-spacing:.08em;color:#5E5E57}
 .ghost span{font-size:10.5px;line-height:1.6}
+
+/* ゆらぎ（光）───────────────────────── */
+.glowbox{position:absolute;pointer-events:none;overflow:hidden}
+.glowbox i{position:absolute;border-radius:50%;display:block;
+  transform:translate(-50%,-50%);mix-blend-mode:screen}
+.glowbox.seq i{opacity:0;transition:opacity .45s ease}
+.glowbox.seq i.on{opacity:1}
+@keyframes gl-flicker{
+  0%,100%{opacity:.35} 18%{opacity:.62} 31%{opacity:.42}
+  52%{opacity:.70} 68%{opacity:.40} 84%{opacity:.58}}
+@keyframes gl-breathe{0%,100%{opacity:.25}50%{opacity:.60}}
+@keyframes gl-steady{0%,100%{opacity:.62}}
+
+/* 部屋の両端に置く飾り ─────────────────── */
+.side-deco{flex:0 0 auto;align-self:center;pointer-events:none;
+  position:relative;height:var(--deco-h,60svh);
+  transform:translateY(var(--deco-y,0px))}
+.side-deco img{height:100%;width:auto;display:block;
+  -webkit-user-drag:none;user-select:none}
+
+/* 拡大したときの、投稿へのリンク ───────────── */
+.lb-link{display:inline-block;margin-top:18px;padding:11px 26px;
+  border:1px solid rgba(255,255,255,.42);
+  font-family:var(--gothic);font-size:12.5px;letter-spacing:.12em;
+  color:#E8EDF2;text-decoration:none;
+  transition:background .25s,border-color .25s}
+.lb-link:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.78)}
+.lb-link[hidden]{display:none}
 /* 作品の下の小さなラベル */
 .tag{margin-top:13px;font-size:10px;letter-spacing:.13em;color:var(--ink-mute);
   text-align:center;line-height:1.6}
@@ -453,6 +834,23 @@ img{display:block}
 .dots i{width:6px;height:6px;border-radius:50%;background:rgba(60,68,75,.26);
   transition:background .3s,transform .3s;cursor:pointer}
 .dots i.on{background:#3C444B;transform:scale(1.35)}
+
+/* ---------- 左右の送り（マウスの方向け） ---------- */
+.swipe{
+  position:fixed;top:50%;translate:0 -50%;z-index:22;
+  width:46px;height:46px;border-radius:50%;
+  /* どの壁の色でも見えるように、暗い丸に明るい矢印 */
+  background:rgba(22,24,27,.5);border:1px solid rgba(255,255,255,.5);
+  color:#FBFBF9;font-size:19px;line-height:1;backdrop-filter:blur(2px);
+  box-shadow:0 3px 12px rgba(0,0,0,.3);
+  opacity:0;visibility:hidden;transition:opacity .5s,visibility .5s,background .2s;
+}
+#gallery.live ~ .swipe{opacity:1;visibility:visible}
+.swipe:hover{background:rgba(22,24,27,.78)}
+.swipe.l{left:12px}
+.swipe.r{right:12px}
+/* 指で操作する画面では出しません */
+@media (hover:none){ .swipe{display:none !important} }
 
 /* ---------- BGM ---------- */
 #bgm{
@@ -550,8 +948,15 @@ img{display:block}
   <button class="navbtn" id="next">次の部屋 →</button>
 </nav>
 
+<!-- 合同展のときだけ出る、ロビーへ戻るボタン -->
+<a class="lobby-btn" id="lobbyBtn" href="#">ロビーへ</a>
+
 <!-- 入場したときの案内 -->
 <div id="hint"><div class="a"></div><div class="b"></div></div>
+
+<!-- 左右の送り（マウスの方向け） -->
+<button class="swipe l" id="swl" aria-label="左へ">‹</button>
+<button class="swipe r" id="swr" aria-label="右へ">›</button>
 
 <!-- BGM -->
 <button id="bgm" aria-label="BGMを再生">♪</button>
@@ -560,7 +965,8 @@ img{display:block}
 <div id="lightbox">
   <button id="lbclose" aria-label="閉じる">✕</button>
   <img id="lbimg" alt="">
-  <div class="lb-text"><h2 id="lbtitle"></h2><p id="lbcap"></p></div>
+  <div class="lb-text"><h2 id="lbtitle"></h2><p id="lbcap"></p>
+    <a class="lb-link" id="lblink" target="_blank" rel="noopener" hidden></a></div>
 </div>
 
 <script>
@@ -576,19 +982,40 @@ const CONFIG = {
   closing:  "ご覧いただき、ありがとうございました。",   // 最後に出る言葉
   links: [                                 // URLを入れた分だけボタンが出ます
     { label:"Instagram", url:"" }
-  ]
+  ],
+
+  /* 壁　color＝色で決める／scene＝自分の絵／pattern＝自分の柄 */
+  wall:     { type:"color" },
+  /* 合同展に参加するときは、ロビーのURLを入れます。
+     入れると入口の扉はなくなり、左上に「ロビーへ」が出ます */
+  lobby: "",
+  /* GA4の測定ID（例 G-XXXXXXXXXX）。空なら何も計測しません */
+  ga: "",
+  /* 入口の絵のファイル名。空なら、いままでの扉になります */
+  entrance: "",
+  /* 入口の絵に置く光（ゆらぎツールの書き出し）。要らなければ null */
+  entranceGlow: null,
+  /* 部屋の両端に置く飾り（透過PNG）。空なら出ません
+     height＝画面の高さに対する％　offset＝上下のずれ（px、マイナスで上） */
+  side: { left:"", right:"", height:60, offset:0 },
+  /* ④で決めた色が暗い色のときは true にします（色で決めるときだけ使います） */
+  dark: false
 };
 
-/* 部屋の名前と、作品のタイトル */
+/* 部屋の名前と、作品のタイトル
+   color … その部屋だけの壁の色（色で決めるとき）
+   wall  … その部屋だけの絵や柄のファイル名（自分の絵・柄のとき）
+   dark  … その部屋だけ文字を明るくする
+   作品には link（投稿のURL）と glow（ゆらぎ）も入れられます */
 const ROOMS = [
   // name は英字、jp はその下の小さな文字（例：BLUE ROOM ／ 青の間）
-  { name:"ROOM A", jp:"第一室", works:[
+  { name:"ROOM A", jp:"第一室", color:"", wall:"", dark:false, works:[
       { file:"art01.png", title:"作品タイトル", caption:"ここに一言。" },
       { file:"art02.png", title:"作品タイトル", caption:"ここに一言。" },
       { file:"art03.png", title:"作品タイトル", caption:"ここに一言。" },
       { file:"art04.png", title:"作品タイトル", caption:"ここに一言。" }
   ]},
-  { name:"ROOM B", jp:"第二室", works:[
+  { name:"ROOM B", jp:"第二室", color:"", wall:"", dark:false, works:[
       { file:"art05.png", title:"作品タイトル", caption:"ここに一言。" },
       { file:"art06.png", title:"作品タイトル", caption:"ここに一言。" },
       { file:"art07.png", title:"作品タイトル", caption:"ここに一言。" },
@@ -601,21 +1028,307 @@ const ROOMS = [
    ============================================================ */
 
 const $ = s => document.querySelector(s);
+
+/* GA4（オプション）。測定IDが入っているときだけ動きます */
+if (CONFIG.ga){
+  const gs = document.createElement('script');
+  gs.async = true;
+  gs.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(CONFIG.ga);
+  document.head.appendChild(gs);
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function(){ window.dataLayer.push(arguments); };
+  gtag('js', new Date());
+  gtag('config', CONFIG.ga);
+}
+function track(name, data){
+  if (CONFIG.ga && typeof gtag === 'function') gtag('event', name, data || {});
+}
+
 const roomsEl = $('#rooms');
+const scrolls = [];        /* 部屋ごとの横スクロール */
 let index = 0;
+
+/* ---------- 壁と入口 ---------- */
+const WALL = CONFIG.wall || { type:"color" };
+const ROOT = document.documentElement.style;
+const scenes = [];         /* 絵の壁の部屋ごとの情報 */
+
+/* ---------- 部屋ごとの壁の色 ---------- */
+const WALL_KEYS = ['--wall','--wall-hi','--wall-dk','--floor','--floor-dk'];
+const roomColor = [];     /* 部屋ごとの色（空なら共通の色） */
+
+function readRoomColor(text){
+  const out = {};
+  String(text || '').split(/[\n;]/).forEach(line => {
+    const m = line.match(/(--[a-z-]+)\s*:\s*([^;]+)/i);
+    if (m && WALL_KEYS.indexOf(m[1]) >= 0) out[m[1]] = m[2].trim();
+  });
+  return out;
+}
+function paintRoom(sec, room){
+  const c = readRoomColor(room && room.color);
+  Object.keys(c).forEach(k => sec.style.setProperty(k, c[k]));
+  return c;
+}
+/* 下のナビは部屋の外にあるので、いまの部屋の色に合わせます */
+function applyChrome(i){
+  const c = roomColor[i] || {};
+  const r = document.documentElement.style;
+  WALL_KEYS.forEach(k => r.removeProperty(k));
+  Object.keys(c).forEach(k => r.setProperty(k, c[k]));
+}
+
+const roomDark = [];       /* 部屋ごとの暗さ */
+const globalDark = (WALL.type === 'color') ? !!CONFIG.dark : !!WALL.dark;
+
+/* 合同展のときは、ロビーから入ってくるので、入口の扉は出しません */
+const IN_GROUP = !!CONFIG.lobby;
+if (IN_GROUP){
+  document.body.classList.add('in-group');
+  const ge = document.getElementById('entrance');
+  if (ge) ge.remove();
+  const gb = document.getElementById('lobbyBtn');
+  if (gb){ gb.href = CONFIG.lobby; gb.style.display = 'inline-flex'; }
+}
+
+if (CONFIG.entrance && !IN_GROUP){
+  document.body.classList.add('ent-image');
+  ROOT.setProperty('--ent-url', 'url("' + CONFIG.entrance + '")');
+}
+
+/* 入口の絵に置いた光 */
+if (CONFIG.entrance && !IN_GROUP && CONFIG.entranceGlow &&
+    CONFIG.entranceGlow.list && CONFIG.entranceGlow.list.length){
+  const ent = document.getElementById('entrance');
+  if (ent){
+    if (getComputedStyle(ent).position === 'static') ent.style.position = 'relative';
+    const clip = document.createElement('div');
+    clip.style.cssText =
+      'position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0';
+    ent.appendChild(clip);
+    const probe = new Image();
+    probe.onload = () => {
+      glowLayer(clip, CONFIG.entranceGlow,
+        () => fitCover(ent, probe.naturalWidth, probe.naturalHeight));
+    };
+    probe.src = CONFIG.entrance;
+  }
+}
+
+/* 部屋の両端に置く飾り */
+const SIDE = CONFIG.side || {};
+function makeSide(file, glow){
+  if (!file) return null;
+  const d = document.createElement('div');
+  d.className = 'side-deco';
+  d.style.setProperty('--deco-h', (SIDE.height || 60) + 'svh');
+  d.style.setProperty('--deco-y', (SIDE.offset || 0) + 'px');
+  const im = document.createElement('img');
+  im.alt = ''; im.draggable = false;
+  im.onerror = () => d.remove();
+  im.src = file;
+  d.appendChild(im);
+  if (glow && glow.list && glow.list.length){
+    const gl = glowLayer(d, glow, () => fitContain(im, im.naturalWidth, im.naturalHeight));
+    if (gl) im.addEventListener('load', gl.fit);
+  }
+  return d;
+}
+if (WALL.file && (WALL.type === 'scene' || WALL.type === 'pattern')){
+  document.body.classList.add('wall-' + WALL.type);
+  if (WALL.type === 'pattern') ROOT.setProperty('--pat', (WALL.size || 240) + 'px');
+}
+
+/* 絵の壁：左右の飾りを端に置いて、真ん中だけ横に伸ばします（部屋ごとに計算します） */
+function layoutOne(e){
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const W = vh * e.ratio;
+  const L = Math.min(.45, Math.max(0, (WALL.left  || 0) / 100));
+  const R = Math.min(.45, Math.max(0, (WALL.right || 0) / 100));
+  const mid = Math.max(.1, 1 - L - R);
+  e.sec.classList.toggle('cover', L <= 0 && R <= 0);
+  let sl = W * L, sr = W * R;
+  /* 画面が狭いときは、飾りの内側を切って真ん中の場所をつくります */
+  const room = Math.max(80, vw - 110);
+  if (sl + sr > room){ const k = room / (sl + sr); sl *= k; sr *= k; }
+  const M = Math.max(40, vw - sl - sr);
+  const scale = M / (W * mid);
+  const st = e.sec.style;
+  st.setProperty('--wall-w', W.toFixed(1) + 'px');
+  st.setProperty('--vis-l', sl.toFixed(1) + 'px');
+  st.setProperty('--vis-r', sr.toFixed(1) + 'px');
+  st.setProperty('--mid-w', (W * scale).toFixed(1) + 'px');
+  st.setProperty('--mid-x', (-(W * L * scale)).toFixed(1) + 'px');
+}
+function layoutScene(){ scenes.forEach(layoutOne); }
+window.addEventListener('resize', layoutScene);
+
+/* 下のナビは部屋の外にあるので、いまの部屋に合わせます */
+function applyChrome(i){
+  const c = roomColor[i] || {};
+  WALL_KEYS.forEach(k => ROOT.removeProperty(k));
+  Object.keys(c).forEach(k => ROOT.setProperty(k, c[k]));
+  document.body.classList.toggle('dark-room', !!roomDark[i]);
+}
+
+/* 部屋に、壁の色・絵・柄を敷きます */
+function dressRoom(sec, room, i){
+  /* プロフィールの部屋は、最後の部屋と同じ壁にします */
+  if (!room) room = ROOMS[ROOMS.length - 1] || null;
+  const c = readRoomColor(room && room.color);
+  Object.keys(c).forEach(k => sec.style.setProperty(k, c[k]));
+  roomColor[i] = c;
+
+  const own = !!((room && room.color) || (room && room.wall));
+  const dk = own ? !!(room && room.dark) : globalDark;
+  roomDark[i] = dk;
+  if (dk) sec.classList.add('dark');
+
+  const file = (room && room.wall) || WALL.file;
+  if (WALL.type === 'scene' && file){
+    sec.style.setProperty('--wall-url', 'url("' + file + '")');
+    ['scene-m','scene-l','scene-r'].forEach(k => {
+      const d = document.createElement('div'); d.className = k; sec.appendChild(d);
+    });
+    const e = { sec:sec, ratio:0.8 };
+    scenes.push(e);
+    layoutOne(e);
+    const probe = new Image();
+    probe.onload = () => {
+      if (probe.naturalHeight) e.ratio = probe.naturalWidth / probe.naturalHeight;
+      layoutOne(e);
+    };
+    probe.onerror = () => {
+      /* その名前の絵が無いときは、色の壁に戻します */
+      sec.classList.add('nowall');
+      [...sec.querySelectorAll('.scene-l,.scene-r,.scene-m')].forEach(d => d.remove());
+      const n = scenes.indexOf(e);
+      if (n >= 0) scenes.splice(n, 1);
+    };
+    probe.src = file;
+  } else if (WALL.type === 'pattern' && file){
+    sec.style.setProperty('--wall-url', 'url("' + file + '")');
+    const d = document.createElement('div'); d.className = 'pattern'; sec.appendChild(d);
+  }
+}
 
 /* ファイル名が .mp4 / .webm なら動画として扱います */
 const isMovie = f => /\.(mp4|webm|mov)$/i.test(f);
 
-/* 入口 */
-$('#entTitle').textContent = CONFIG.title;
-$('#entArtist').textContent = CONFIG.artist;
+/* ============================================================
+   ゆらぎ（光）
+   ゆらぎツールの書き出しを、絵の上に置きます
+   ============================================================ */
+const GLOW_TONES = {
+  ember:  ['rgba(255,170,80,.95)',  'rgba(255,140,50,.35)'],
+  warm:   ['rgba(255,214,150,.95)', 'rgba(255,180,90,.35)'],
+  window: ['rgba(255,240,210,.95)', 'rgba(255,225,175,.35)'],
+  cool:   ['rgba(205,230,255,.95)', 'rgba(150,195,245,.35)'],
+  rose:   ['rgba(255,205,225,.95)', 'rgba(255,160,200,.35)']
+};
+
+/* host … 光を入れる場所（position:relative であること）
+   g    … { mode, step, list:[{x,y,size,power,tone,motion,speed}] }
+   measure … 絵が実際に見えている四角 {x,y,w,h} を返す関数        */
+function glowLayer(host, g, measure){
+  if (!g || !g.list || !g.list.length || !host) return null;
+  const seq = (g.mode === 'sequence');
+  const box = document.createElement('div');
+  box.className = 'glowbox' + (seq ? ' seq' : '');
+
+  const dots = g.list.map((p, i) => {
+    const t = GLOW_TONES[p.tone] || GLOW_TONES.warm;
+    const sp = (+p.speed || 3.4);
+    const el = document.createElement('i');
+    el.style.left = (+p.x || 0) + '%';
+    el.style.top  = (+p.y || 0) + '%';
+    el.style.background =
+      'radial-gradient(closest-side,' + t[0] + ',' + t[1] + ',transparent)';
+    el.style.filter =
+      'brightness(' + (((p.power == null ? 100 : +p.power)) / 100).toFixed(2) + ')';
+    const anim = 'gl-' + (p.motion || 'flicker') + ' ' + sp + 's ease-in-out infinite';
+    if (seq){ el.dataset.anim = anim; }
+    else {
+      el.style.animation = anim;
+      el.style.animationDelay = (-(((i * 0.37) % 1) * sp)).toFixed(2) + 's';
+    }
+    box.appendChild(el);
+    return el;
+  });
+  host.appendChild(box);
+
+  function fit(){
+    const r = measure();
+    if (!r || !r.w || !r.h) return;
+    box.style.left = r.x + 'px';
+    box.style.top  = r.y + 'px';
+    box.style.width  = r.w + 'px';
+    box.style.height = r.h + 'px';
+    const k = r.w / r.h;
+    dots.forEach((el, i) => {
+      const s = +g.list[i].size || 8;
+      el.style.width  = s + '%';
+      el.style.height = (s * k) + '%';
+    });
+  }
+  fit();
+  window.addEventListener('resize', fit);
+
+  if (seq){
+    const order = dots.map((el, i) => ({ el:el, y:+g.list[i].y || 0 }))
+                      .sort((a, b) => b.y - a.y);
+    const step = +g.step || 95;
+    let done = false;
+    const run = () => {
+      if (done) return; done = true;
+      order.forEach((o, i) => setTimeout(() => {
+        o.el.classList.add('on');
+        o.el.style.animation = o.el.dataset.anim;
+      }, step * i));
+    };
+    if ('IntersectionObserver' in window){
+      const io = new IntersectionObserver(es => es.forEach(e => {
+        if (e.isIntersecting){ run(); io.disconnect(); }
+      }), { threshold:0.25 });
+      io.observe(host);
+    } else run();
+  }
+  return { box:box, fit:fit };
+}
+
+/* 絵が「はみ出さずに収まって」見えているときの四角（object-fit:contain） */
+function fitContain(el, nw, nh){
+  const ow = el.offsetWidth, oh = el.offsetHeight;
+  let x = el.offsetLeft, y = el.offsetTop, w = ow, h = oh;
+  if (nw && nh && ow && oh){
+    const s = Math.min(ow / nw, oh / nh);
+    w = nw * s; h = nh * s;
+    x += (ow - w) / 2; y += (oh - h) / 2;
+  }
+  return { x:x, y:y, w:w, h:h };
+}
+/* 絵が「いっぱいに広がって」見えているときの四角（background cover） */
+function fitCover(el, nw, nh){
+  const ow = el.clientWidth, oh = el.clientHeight;
+  let x = 0, y = 0, w = ow, h = oh;
+  if (nw && nh && ow && oh){
+    const s = Math.max(ow / nw, oh / nh);
+    w = nw * s; h = nh * s;
+    x = (ow - w) / 2; y = (oh - h) / 2;
+  }
+  return { x:x, y:y, w:w, h:h };
+}
+
+/* 入口（合同展のときは、入口そのものがありません） */
+const _et = $('#entTitle');  if (_et) _et.textContent = CONFIG.title;
+const _ea = $('#entArtist'); if (_ea) _ea.textContent = CONFIG.artist;
 document.title = CONFIG.title + ' ／ ' + CONFIG.artist;
 
 /* 会場を組み立てる */
 ROOMS.forEach((room, ri) => {
   const sec = document.createElement('section');
   sec.className = 'room';
+  dressRoom(sec, room, ri);
   const scroll = document.createElement('div');
   scroll.className = 'wall-scroll';
   const wall = document.createElement('div');
@@ -626,7 +1339,13 @@ ROOMS.forEach((room, ri) => {
   plate.innerHTML = esc(room.name) + (room.jp ? '<small>' + esc(room.jp) + '</small>' : '');
   wall.appendChild(plate);
 
+  const decoL = makeSide(SIDE.left, SIDE.glowL);
+  if (decoL) wall.appendChild(decoL);
+
   room.works.forEach(w => wall.appendChild(makeArt(w)));
+
+  const decoR = makeSide(SIDE.right, SIDE.glowR);
+  if (decoR) wall.appendChild(decoR);
 
   const isLast = (ri === ROOMS.length - 1);
   const exit = document.createElement('button');
@@ -640,12 +1359,14 @@ ROOMS.forEach((room, ri) => {
     sec.style.setProperty('--pan', (-scroll.scrollLeft) + 'px');
   }, { passive:true });
   sec.appendChild(scroll);
+  scrolls.push(scroll);
   roomsEl.appendChild(sec);
 });
 
 /* プロフィールの部屋 */
 const psec = document.createElement('section');
 psec.className = 'room profile-room';
+dressRoom(psec, null, ROOMS.length);
 const pscroll = document.createElement('div');
 pscroll.className = 'wall-scroll';
 const pwall = document.createElement('div');
@@ -668,6 +1389,7 @@ pwall.innerHTML =
   '</div>';
 pscroll.appendChild(pwall);
 psec.appendChild(pscroll);
+scrolls.push(pscroll);
 roomsEl.appendChild(psec);
 
 const TOTAL = ROOMS.length + 1;
@@ -705,11 +1427,24 @@ function makeArt(w){
     el.tabIndex = -1;
     frame.innerHTML =
       '<div class="ghost"><b>' + esc(w.file) + '</b>' +
-      '<span>この名前でファイルを置くと<br>ここに表示されます</span></div>';
+      '<span>この名前でファイルを置くと<br>ここに表示されます<br>' +
+      '（名前はすべて小文字です）</span></div>';
   };
   media.src = w.file;
   frame.appendChild(media);
   el.appendChild(frame);
+
+  /* この作品に置かれた光（ゆらぎ） */
+  if (w.glow && w.glow.list && w.glow.list.length){
+    const gl = glowLayer(frame, w.glow, () => fitContain(
+      media,
+      media.naturalWidth  || media.videoWidth,
+      media.naturalHeight || media.videoHeight));
+    if (gl){
+      media.addEventListener('load', gl.fit);
+      media.addEventListener('loadedmetadata', gl.fit);
+    }
+  }
 
   /* 画面に入っていない動画は止めておく（スマホを軽くするため） */
   if (movie && 'IntersectionObserver' in window){
@@ -747,7 +1482,24 @@ function go(i){
   [...dots.children].forEach((d, n) => d.classList.toggle('on', n === index));
   $('#prev').disabled = index === 0;
   $('#next').disabled = index === TOTAL - 1;
+  applyChrome(index);
+  showSwipe();
 }
+
+/* 横に続きがある部屋のときだけ、左右の送りを出します */
+function showSwipe(){
+  const s = scrolls[index];
+  const can = !!s && s.scrollWidth > s.clientWidth + 4;
+  ['#swl','#swr'].forEach(k => { const b = $(k); if (b) b.style.display = can ? '' : 'none'; });
+}
+function slide(dir){
+  const s = scrolls[index];
+  if (!s) return;
+  s.scrollBy({ left: dir * s.clientWidth * 0.8, behavior:'smooth' });
+}
+$('#swl').addEventListener('click', () => slide(-1));
+$('#swr').addEventListener('click', () => slide(1));
+window.addEventListener('resize', showSwipe);
 $('#prev').addEventListener('click', () => go(index - 1));
 $('#next').addEventListener('click', () => go(index + 1));
 go(0);
@@ -770,18 +1522,41 @@ function showHint(){
   const touch = window.matchMedia('(hover: none)').matches;
   hint.querySelector('.a').textContent =
     touch ? '← 横にスワイプして展示をご覧ください →'
-          : '← 横にスクロールして展示をご覧ください →';
+          : '← 左右の ‹ › か、マウスのホイールで動かせます →';
   hint.querySelector('.b').textContent =
     touch ? '作品をタップすると拡大できます'
           : '作品をクリックすると拡大できます';
   setTimeout(() => hint.classList.add('on'), 500);
   setTimeout(() => hint.classList.remove('on'), 4200);
 }
-$('#enterBtn').addEventListener('click', enter);
-$('#door').addEventListener('click', enter);
+const _eb = $('#enterBtn'); if (_eb) _eb.addEventListener('click', enter);
+const _dr = $('#door');     if (_dr) _dr.addEventListener('click', enter);
+
+/* 合同展のときは、開いた時点でもう中にいます */
+if (IN_GROUP){
+  $('#gallery').classList.add('live');
+  setTimeout(showHint, 400);
+}
 
 /* 拡大表示 */
 const lb = $('#lightbox');
+/* 投稿のURLから、ボタンの文字を決めます */
+function linkLabel(url){
+  const h = String(url || '').toLowerCase();
+  if (h.indexOf('instagram.') >= 0) return 'Instagram で見る';
+  if (h.indexOf('threads.')   >= 0) return 'Threads で見る';
+  if (h.indexOf('note.com')   >= 0) return 'note で読む';
+  if (h.indexOf('youtube.') >= 0 || h.indexOf('youtu.be') >= 0) return 'YouTube で見る';
+  if (h.indexOf('x.com') >= 0 || h.indexOf('twitter.') >= 0) return 'X で見る';
+  if (h.indexOf('pixiv.') >= 0) return 'pixiv で見る';
+  if (h.indexOf('tiktok.') >= 0) return 'TikTok で見る';
+  if (h.indexOf('minne.') >= 0 || h.indexOf('booth.') >= 0 ||
+      h.indexOf('base.shop') >= 0 || h.indexOf('base.ec') >= 0) return 'ショップで見る';
+  return 'この作品の投稿を見る';
+}
+
+let lbGlow = null;
+
 function openLightbox(w){
   const movie = isMovie(w.file);
   const old = document.getElementById('lbimg');
@@ -800,12 +1575,43 @@ function openLightbox(w){
   old.replaceWith(m);
   $('#lbtitle').textContent = w.title || '';
   $('#lbcap').textContent = w.caption || '';
+
+  track('art_open', { art_title: w.title || '', art_file: w.file || '' });
+
+  /* 投稿へのリンク */
+  const a = $('#lblink');
+  if (a){
+    if (w.link){
+      a.href = w.link;
+      a.textContent = linkLabel(w.link);
+      a.hidden = false;
+      a.onclick = () => track('art_link',
+        { art_title: w.title || '', link_url: w.link });
+    } else {
+      a.hidden = true;
+      a.removeAttribute('href');
+    }
+  }
+
+  /* 拡大したほうにも、同じ光を置きます */
+  if (lbGlow && lbGlow.box) lbGlow.box.remove();
+  lbGlow = null;
+  if (w.glow && w.glow.list && w.glow.list.length){
+    lbGlow = glowLayer(lb, w.glow, () => fitContain(
+      m, m.naturalWidth || m.videoWidth, m.naturalHeight || m.videoHeight));
+    if (lbGlow){
+      m.addEventListener('load', lbGlow.fit);
+      m.addEventListener('loadedmetadata', lbGlow.fit);
+    }
+  }
+
   lb.classList.add('on');
 }
 function closeLightbox(){
   lb.classList.remove('on');
   const m = document.getElementById('lbimg');
   if (m && m.tagName === 'VIDEO') m.pause();
+  if (lbGlow && lbGlow.box){ lbGlow.box.remove(); lbGlow = null; }
 }
 $('#lbclose').addEventListener('click', closeLightbox);
 lb.addEventListener('click', e => { if (e.target === lb) closeLightbox(); });
@@ -871,6 +1677,182 @@ function esc(s){
 <script>
 const $ = s => document.querySelector(s);
 
+/* ============================================================
+   このフォームの種類（主催者用）
+   advanced … 応用編（部屋と作品を増やせる、壁の色を選べる）
+   basic    … 基本編（2部屋×4作品で固定、壁は決まった色）
+   ============================================================ */
+const TIER = 'advanced';
+
+/* ============================================================
+   合同展のロビーURL（主催者用）
+   ここに入れておくと、「合同展に参加する」を選んだ人の欄に
+   最初から入っています。打ち間違いがなくなります
+   ============================================================ */
+const LOBBY_DEFAULT = 'https://lina-ai-works.github.io/christmas-2026/lobby.html';
+
+/* ============================================================
+   オプションのキーワード
+   （主催者用）渡すキーワードを変えたいときは、ここを書き換えてください
+   ============================================================ */
+const OPT_KEYS = {
+  iriguchi: '入口の絵',
+  kabe:     '壁の絵・柄',
+  yuragi:   'ゆらぎ',
+  link:     '投稿へのリンク',
+  ga4:      'GA4の計測'
+};
+
+/* まとめて開くキーワード（主催者用）
+   オリジナル編は「入口の絵」と「壁の絵・柄」の両方が入っているので、
+   original と1語だけで、2つとも出てきます */
+const OPT_ALIAS = {
+  original: ['iriguchi', 'kabe']
+};
+
+/* 用意された飾り（主催者用）。置いた場所に合わせて書き換えてください */
+const DECO_SETS = [
+  { id:'xmas',    name:'クリスマス',
+    left:'https://lina-ai-works.github.io/lx7k2m9/deco/xmas/left.webp',
+    right:'https://lina-ai-works.github.io/lx7k2m9/deco/xmas/right.webp' },
+  { id:'newyear', name:'お正月',
+    left:'https://lina-ai-works.github.io/lx7k2m9/deco/newyear/left.webp',
+    right:'https://lina-ai-works.github.io/lx7k2m9/deco/newyear/right.webp' }
+];
+
+let OPT = {};
+function hasOpt(k){ return !!OPT[k]; }
+
+function readOptKeys(){
+  const raw = ($('#optKey').value || '').toLowerCase();
+  const words = raw.split(/[\s,、　]+/).filter(Boolean);
+  OPT = {};
+  words.forEach(w => {
+    if (OPT_ALIAS[w]) OPT_ALIAS[w].forEach(k => { OPT[k] = true; });
+    else if (OPT_KEYS[w]) OPT[w] = true;
+  });
+  const names = Object.keys(OPT).map(k => OPT_KEYS[k]);
+  const msg = $('#optMsg');
+  if (!words.length){ msg.textContent = ''; msg.className = ''; }
+  else if (!names.length){
+    msg.textContent = 'このキーワードは見つかりませんでした。打ち間違いがないか確かめてください。';
+    msg.className = 'ng';
+  } else {
+    msg.textContent = '使えます：' + names.join('　／　');
+    msg.className = 'ok';
+  }
+  applyOpts();
+}
+
+/* 基本編では、壁の欄と「増やす・減らす」を出しません */
+function applyTier(){
+  if (TIER !== 'basic') return;
+  const ws = $('#wallSec');
+  if (ws) ws.hidden = true;
+  const ar = $('#addRoomRow');
+  if (ar) ar.hidden = true;
+  document.querySelectorAll('[data-del],[data-addw],[data-delw]').forEach(b => {
+    const row = b.closest('.addrow') || b;
+    row.hidden = true;
+  });
+  document.querySelectorAll('.roomwall').forEach(el => { el.hidden = true; });
+
+  /* 基本編の入口は、オプションの「自分の絵」だけです。色の欄は出しません */
+  const es = $('#entSec');
+  if (es){
+    const pick = es.querySelector('.pick');
+    if (pick) pick.hidden = true;
+    const ec = $('#em-color');
+    if (ec) ec.hidden = true;
+    const grp = (typeof useMode === 'function') && (useMode() === 'group');
+    es.hidden = !hasOpt('iriguchi') || grp;
+    if (hasOpt('iriguchi') && !grp){
+      const ei = document.querySelector('input[name=entmode][value="image"]');
+      if (ei && !ei.checked){
+        ei.checked = true;
+        if (typeof showMode === 'function') showMode();
+        if (ec) ec.hidden = true;
+      }
+    }
+  }
+}
+
+/* 見えている欄に、通し番号をつけ直します */
+const CIRCLED = '①②③④⑤⑥⑦⑧⑨⑩';
+function renumber(){
+  let n = 0;
+  document.querySelectorAll('.wrap > section > h2').forEach(h => {
+    const sec = h.parentElement;
+    if (sec.hidden || sec.id === 'optSec' || sec.id === 'useSec') return;
+    const t = h.textContent.replace(/^[①-⑩]\s*/, '');
+    h.textContent = (n < CIRCLED.length ? CIRCLED[n] + ' ' : '') + t;
+    n++;
+  });
+}
+
+function applyOpts(){
+  document.querySelectorAll('.opt[data-opt]').forEach(el => {
+    el.hidden = !hasOpt(el.dataset.opt);
+  });
+  applyTier();
+  renumber();
+  /* キーワードを消したときは、色の壁・色の入口に戻します */
+  if (!hasOpt('kabe') && (wallMode() !== 'color')){
+    const r = document.querySelector('input[name=wallmode][value="color"]');
+    if (r){ r.checked = true; showMode(); }
+  }
+  if (!hasOpt('iriguchi')){
+    const r = document.querySelector('input[name=entmode][value="color"]');
+    if (r && !r.checked){ r.checked = true; showMode(); }
+  }
+}
+
+/* ---------- ゆらぎの書き出しを読む ---------- */
+function parseGlow(text){
+  const t = String(text || '');
+  if (!t.trim()) return null;
+  const m = t.match(/GLOWS\s*=\s*(\[[\s\S]*?\])\s*;/);
+  if (!m) return null;
+  let list = null;
+  try { list = new Function('return ' + m[1] + ';')(); } catch(e){ return null; }
+  if (!Array.isArray(list) || !list.length) return null;
+  const mm = t.match(/GLOW_MODE\s*=\s*["'](\w+)["']/);
+  const sm = t.match(/GLOW_STEP\s*=\s*(\d+)/);
+  return {
+    mode: (mm && mm[1] === 'sequence') ? 'sequence' : 'always',
+    step: sm ? +sm[1] : 95,
+    list: list
+  };
+}
+/* CONFIG に書き出す形 */
+function glowLiteral(g){
+  if (!g) return 'null';
+  const items = g.list.map(p =>
+    '{x:' + (+p.x || 0) + ',y:' + (+p.y || 0) +
+    ',size:' + (+p.size || 8) +
+    ',power:' + (p.power == null ? 100 : +p.power) +
+    ',tone:"' + (p.tone || 'warm') + '"' +
+    ',motion:"' + (p.motion || 'flicker') + '"' +
+    ',speed:' + (+p.speed || 3.4) + '}').join(',');
+  return '{ mode:"' + g.mode + '", step:' + (+g.step || 95) + ', list:[' + items + '] }';
+}
+/* 読み込み直したとき、貼り付け欄に戻す形 */
+function glowText(g){
+  if (!g || !g.list || !g.list.length) return '';
+  let s = '';
+  if (g.mode === 'sequence'){
+    s += 'const GLOW_MODE = "sequence";\nconst GLOW_STEP = ' + (g.step || 95) + ';\n\n';
+  } else {
+    s += 'const GLOW_MODE = "always";\n\n';
+  }
+  s += 'const GLOWS = [\n' + g.list.map(p =>
+    '  { x:' + p.x + ', y:' + p.y + ', size:' + p.size +
+    ', power:' + (p.power == null ? 100 : p.power) +
+    ', tone:"' + (p.tone || 'warm') + '", motion:"' + (p.motion || 'flicker') +
+    '", speed:' + (p.speed || 3.4) + ' }').join(',\n') + '\n];';
+  return s;
+}
+
 /* ---------- リンク ---------- */
 const LINKS = [
   { label:"Instagram" }, { label:"" }, { label:"" }
@@ -889,11 +1871,18 @@ LINKS.forEach(l => {
 
 /* ---------- 部屋と作品 ---------- */
 let rooms = [
-  { name:"ROOM A", jp:"第一室", works:[{},{},{},{}] },
-  { name:"ROOM B", jp:"第二室", works:[{},{},{},{}] }
+  { name:"ROOM A", jp:"第一室", color:"", wall:"", dark:false, works:[{},{},{},{}] },
+  { name:"ROOM B", jp:"第二室", color:"", wall:"", dark:false, works:[{},{},{},{}] }
 ];
 
 function pad(n){ return (n < 10 ? '0' : '') + n; }
+
+/* 画像の種類（png か jpg）と、動画（.mp4） */
+function ext(){
+  const r = document.querySelector('input[name=ext]:checked');
+  return r ? r.value : '.png';
+}
+function fileOf(no, movie){ return 'art' + pad(no) + (movie ? '.mp4' : ext()); }
 
 /* 入力中の内容を控えてから作り直します */
 function readRooms(){
@@ -905,8 +1894,39 @@ function readRooms(){
     rooms[ri].jp   = box.querySelector('.rj').value;
     const ts = [...box.querySelectorAll('.wt')];
     const cs = [...box.querySelectorAll('.wc')];
-    rooms[ri].works = ts.map((t, i) => ({ title:t.value, caption:cs[i].value }));
+    const vs = [...box.querySelectorAll('.wv')];
+    const ls = [...box.querySelectorAll('.wl')];
+    const gs = [...box.querySelectorAll('.wg')];
+    const old = rooms[ri].works || [];
+    rooms[ri].works = ts.map((t, i) => ({
+      title:t.value, caption:cs[i].value, movie:vs[i] ? vs[i].checked : false,
+      link: ls[i] ? ls[i].value.trim() : ((old[i] && old[i].link) || ''),
+      glowText: gs[i] ? gs[i].value : ((old[i] && old[i].glowText) || '')
+    }));
+    const rc = box.querySelector('.rc'), rw = box.querySelector('.rw'),
+          rd = box.querySelector('.rd');
+    if (rc) rooms[ri].color = rc.value;
+    if (rw) rooms[ri].wall  = rw.value;
+    rooms[ri].dark = rd ? rd.checked : false;
   });
+}
+
+/* 部屋ごとの壁の欄（④で選んだ形に合わせて変わります） */
+function roomWallBox(r){
+  const m = (typeof wallMode === 'function') ? wallMode() : 'color';
+  const dk = '<label class="vrow"><input type="checkbox" class="rd"' +
+    (r.dark ? ' checked' : '') + '>この部屋は暗いです（文字を明るくします）</label>';
+  if (m === 'color'){
+    return '<div class="rcbox roomwall"><label><span class="t">' +
+      '<b>この部屋の壁の色</b>　空なら、④で決めた色が使われます</span>' +
+      '<textarea class="rc" placeholder="壁色ツールの5行を貼り付け">' +
+        esc(r.color || '') + '</textarea></label>' + dk + '</div>';
+  }
+  const what = (m === 'scene') ? '絵' : '柄';
+  return '<div class="rcbox roomwall"><label><span class="t">' +
+    '<b>この部屋の壁の' + what + '</b>　空なら、④で決めた' + what + 'が使われます</span>' +
+    '<input type="text" class="rw" value="' + esc(r.wall || '') +
+      '" placeholder="例：wall02.png"></label>' + dk + '</div>';
 }
 
 function drawRooms(){
@@ -929,17 +1949,28 @@ function drawRooms(){
       '</div><div class="works">';
 
     r.works.forEach(w => {
-      const f = 'art' + pad(no++) + '.png';
+      const f = fileOf(no++, w.movie);
       h +=
         '<div class="work">' +
           '<label><span class="t"><span class="file">' + f + '</span><b>作品のタイトル</b></span>' +
-            '<input type="text" class="wt" data-file="' + f + '" value="' + esc(w.title || '') + '" placeholder="例：夜明けの海"></label>' +
+            '<input type="text" class="wt" value="' + esc(w.title || '') + '" placeholder="例：夜明けの海"></label>' +
           '<label><span class="t">一言コメント（空でもOK）</span>' +
             '<input type="text" class="wc" value="' + esc(w.caption || '') + '" placeholder="例：静かな朝の記憶。"></label>' +
+          '<label class="vrow"><input type="checkbox" class="wv"' + (w.movie ? ' checked' : '') +
+            '>この作品は動画（.mp4）</label>' +
+          '<label class="opt" data-opt="link"' + (hasOpt('link') ? '' : ' hidden') + '>' +
+            '<span class="t"><b>投稿のURL</b>　空でもOK。拡大したときにボタンが出ます</span>' +
+            '<input type="text" class="wl" value="' + esc(w.link || '') +
+            '" placeholder="https://www.instagram.com/p/..."></label>' +
+          '<label class="opt" data-opt="yuragi"' + (hasOpt('yuragi') ? '' : ' hidden') + '>' +
+            '<span class="t"><b>ゆらぎ</b>　ゆらぎツールの書き出し。空でもOK</span>' +
+            '<textarea class="wg" rows="2" placeholder="const GLOWS = [ … ];">' +
+            esc(w.glowText || '') + '</textarea></label>' +
         '</div>';
     });
 
-    h += '</div><div class="addrow">' +
+    h += '</div>' + roomWallBox(r) +
+       '<div class="addrow">' +
          '<button class="mini" data-addw="' + ri + '">＋ 作品を増やす</button>' +
          (r.works.length > 1
            ? '<button class="mini danger" data-delw="' + ri + '">－ 作品を減らす</button>' : '') +
@@ -960,11 +1991,19 @@ function drawRooms(){
     b.addEventListener('click', () => {
       readRooms(); rooms[+b.dataset.delw].works.pop(); drawRooms();
     }));
+  el.querySelectorAll('.wv').forEach(c =>
+    c.addEventListener('change', () => { readRooms(); drawRooms(); }));
+  const last = $('#lastFile');
+  if (last) last.textContent = fileOf(no - 1, false);
 }
+
+document.querySelectorAll('input[name=ext]').forEach(r =>
+  r.addEventListener('change', () => { readRooms(); drawRooms(); }));
 
 $('#addRoom').addEventListener('click', () => {
   readRooms();
-  rooms.push({ name:"ROOM " + String.fromCharCode(65 + rooms.length), jp:"", works:[{},{},{},{}] });
+  rooms.push({ name:"ROOM " + String.fromCharCode(65 + rooms.length), jp:"",
+    color:"", wall:"", dark:false, works:[{},{},{},{}] });
   drawRooms();
 });
 
@@ -1017,6 +2056,27 @@ function pickFile(cb){
 
 function applyLoaded(data){
   const c = data.CONFIG, R = data.ROOMS, col = data.colors || {};
+
+  /* 前に使っていたオプションは、そのまま使えるようにします */
+  const on = [];
+  if (c.entrance) on.push('iriguchi');
+  const w0 = c.wall || {};
+  if (w0.type === 'scene' || w0.type === 'pattern') on.push('kabe');
+  if (c.ga) on.push('ga4');
+  const anyLink = (R || []).some(r => (r.works || []).some(w => w && w.link));
+  if (anyLink) on.push('link');
+  const anyGlow = !!c.entranceGlow ||
+    !!(c.side && (c.side.glowL || c.side.glowR)) ||
+    (R || []).some(r => (r.works || []).some(w => w && w.glow));
+  if (anyGlow) on.push('yuragi');
+  if (on.length){
+    const cur = ($('#optKey').value || '').toLowerCase()
+      .split(/[\s,、　]+/).filter(Boolean);
+    on.forEach(k => { if (cur.indexOf(k) < 0) cur.push(k); });
+    $('#optKey').value = cur.join(' ');
+  }
+  readOptKeys();
+
   $('#title').value   = c.title   || '';
   $('#artist').value  = c.artist  || '';
   $('#role').value    = c.role    || '';
@@ -1029,13 +2089,28 @@ function applyLoaded(data){
     row.querySelector('.lu').value = l.url || '';
   });
 
+  /* 画像の種類を、読み込んだファイル名から決めます */
+  const firstImg = (R || []).flatMap(r => (r.works || []))
+    .map(w => w.file || '').find(f => !/\.(mp4|webm|mov)$/i.test(f)) || '';
+  const sel = document.querySelector(
+    'input[name=ext][value="' + (/\.jpe?g$/i.test(firstImg) ? '.jpg' : '.png') + '"]');
+  if (sel) sel.checked = true;
+
   /* 部屋と作品を、そのまま作り直す */
   rooms = (R || []).map(r => ({
     name: r.name || '',
     jp:   r.jp   || '',
-    works: (r.works || []).map(w => ({ title:w.title || '', caption:w.caption || '' }))
+    color: r.color || '',
+    wall:  r.wall  || '',
+    dark:  !!r.dark,
+    works: (r.works || []).map(w => ({
+      title:w.title || '', caption:w.caption || '',
+      movie: /\.(mp4|webm|mov)$/i.test(w.file || ''),
+      link: w.link || '',
+      glowText: glowText(w.glow)
+    }))
   }));
-  if (!rooms.length) rooms = [{ name:'ROOM A', jp:'', works:[{},{},{},{}] }];
+  if (!rooms.length) rooms = [{ name:'ROOM A', jp:'', color:'', wall:'', dark:false, works:[{},{},{},{}] }];
   drawRooms();
 
   /* いまの色を、貼り付け欄に入れておく */
@@ -1045,6 +2120,64 @@ function applyLoaded(data){
   if (w) $('#wallCss').value = w;
   if (e) $('#entCss').value = e;
   checkPaste();
+
+  /* 壁と入口の決め方も戻す */
+  const cw = c.wall || { type:'color' };
+  const mode = (cw.type === 'scene' || cw.type === 'pattern') ? cw.type : 'color';
+  const wr = document.querySelector('input[name=wallmode][value="' + mode + '"]');
+  if (wr) wr.checked = true;
+  if (mode === 'scene'){
+    $('#sceneFile').value = cw.file || 'wall.png';
+    $('#sceneL').value = (cw.left  != null ? cw.left  : 30);
+    $('#sceneR').value = (cw.right != null ? cw.right : 20);
+    $('#sceneDark').checked = !!cw.dark;
+  }
+  if (mode === 'pattern'){
+    $('#patFile').value = cw.file || 'wall.png';
+    $('#patSize').value = cw.size || 240;
+    $('#patDark').checked = !!cw.dark;
+    const fl = (col['--floor'] || '').trim();
+    if (/^#[0-9a-f]{6}$/i.test(fl)){
+      $('#patFloor').value = fl.toLowerCase();
+      $('#patFloorV').textContent = fl.toUpperCase();
+    }
+  }
+  const em = c.entrance ? 'image' : 'color';
+  const er = document.querySelector('input[name=entmode][value="' + em + '"]');
+  if (er) er.checked = true;
+  if (c.entrance) $('#entFile').value = c.entrance;
+  $('#wallDark').checked = !!c.dark;
+
+  /* ひとりの展示か、合同展か */
+  const um = document.querySelector(
+    'input[name=usemode][value="' + (c.lobby ? 'group' : 'solo') + '"]');
+  if (um) um.checked = true;
+  if (c.lobby) $('#lobbyUrl').value = c.lobby;
+  showUse();
+
+  /* GA4・ゆらぎ・飾り */
+  $('#gaId').value = c.ga || '';
+  $('#entGlow').value = glowText(c.entranceGlow);
+
+  const sd = c.side || {};
+  const ready = DECO_SETS.filter(d => d.left === sd.left && d.right === sd.right)[0];
+  const dmode = (!sd.left && !sd.right) ? 'none' : (ready ? 'ready' : 'own');
+  const dr = document.querySelector('input[name=decomode][value="' + dmode + '"]');
+  if (dr) dr.checked = true;
+  if (ready) $('#decoSet').value = ready.id;
+  if (dmode === 'own'){
+    $('#decoL').value = sd.left || '';
+    $('#decoR').value = sd.right || '';
+  }
+  $('#decoH').value = (sd.height != null ? sd.height : 62);
+  $('#decoHv').textContent = $('#decoH').value + '%';
+  $('#decoY').value = (sd.offset != null ? sd.offset : 0);
+  $('#decoYv').textContent = $('#decoY').value + 'px';
+  $('#decoGlowL').value = glowText(sd.glowL);
+  $('#decoGlowR').value = glowText(sd.glowR);
+  showDeco();
+
+  showMode();
 }
 
 $('#loadBtn').addEventListener('click', () => {
@@ -1086,11 +2219,327 @@ function checkPaste(){
 $('#wallCss').addEventListener('input', checkPaste);
 $('#entCss').addEventListener('input', checkPaste);
 
+/* ============================================================
+   壁と入口（オリジナル編）
+   ============================================================ */
+const PIC = { scene:null, pattern:null, ent:null };   /* 見え方の確認に使うだけ */
+
+function wallMode(){
+  const r = document.querySelector('input[name=wallmode]:checked');
+  return r ? r.value : 'color';
+}
+function entMode(){
+  const r = document.querySelector('input[name=entmode]:checked');
+  return r ? r.value : 'color';
+}
+function showMode(){
+  const w = wallMode(), e = entMode();
+  $('#wm-scene').hidden   = (w !== 'scene');
+  $('#wm-pattern').hidden = (w !== 'pattern');
+  /* 柄のときは、床の色にも使うので色の欄も出します */
+  $('#wm-color').hidden = (w !== 'color');
+  ['color','image'].forEach(k => { $('#em-' + k).hidden = (k !== e); });
+  drawScene(); drawPattern(); drawEnt();
+  if (typeof rooms !== 'undefined') { readRooms(); drawRooms(); }
+}
+document.querySelectorAll('input[name=wallmode],input[name=entmode]')
+  .forEach(r => r.addEventListener('change', showMode));
+
+/* 絵を選ぶ（この画面で見るだけ。どこにも送りません） */
+function pickImage(cb){
+  const inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = 'image/*';
+  inp.addEventListener('change', () => {
+    const f = inp.files && inp.files[0];
+    if (!f) return;
+    const fr = new FileReader();
+    fr.onload = () => {
+      const im = new Image();
+      im.onload = () => cb({ url:String(fr.result), w:im.naturalWidth, h:im.naturalHeight, name:f.name });
+      im.src = String(fr.result);
+    };
+    fr.readAsDataURL(f);
+  });
+  inp.click();
+}
+
+/* ---------- 絵の壁 ---------- */
+function sceneVals(){
+  return {
+    L: +$('#sceneL').value,
+    R: +$('#sceneR').value,
+    dark: $('#sceneDark').checked,
+    file: $('#sceneFile').value.trim() || 'wall.png'
+  };
+}
+/* 実際の画面と同じ割合で描きます（パソコン 1280×800／スマホ 390×844） */
+const VP = { pc:{ w:1280, h:800 }, sp:{ w:390, h:844 } };
+
+function roomPlan(v, ratio, L, R){
+  const l = Math.min(.45, Math.max(0, L / 100));
+  const r = Math.min(.45, Math.max(0, R / 100));
+  const cover = (l <= 0 && r <= 0);
+  const W = v.h * ratio;
+  const mid = Math.max(.1, 1 - l - r);
+  let sl = W * l, sr = W * r;
+  const room = Math.max(80, v.w - 110);
+  if (sl + sr > room){ const k = room / (sl + sr); sl *= k; sr *= k; }
+  const M = Math.max(40, v.w - sl - sr);
+  const sc = M / (W * mid);
+  return { cover:cover, W:W, sl:sl, sr:sr, midW:W * sc, midX:-(W * l * sc) };
+}
+/* 作品の大きさと間隔も、テンプレートと同じ式です */
+function cardPlan(v){
+  return {
+    card: Math.min(320, Math.max(168, v.w * .44)),
+    gap:  Math.min(96,  Math.max(44,  v.w * .09))
+  };
+}
+function edgeOf(v){ return Math.min(150, Math.max(30, v.w * .13)); }
+function drawArts(box, v, k, fromX, toX){
+  const c = cardPlan(v);
+  const aw = c.card, ah = Math.min(c.card * 1.3, v.h * .4);
+  const top = v.h * .4 - ah / 2;
+  let x = fromX;
+  let n = 0;
+  while (x < toX && n < 8){
+    const u = document.createElement('u');
+    u.style.cssText = 'left:' + (x * k) + 'px;width:' + (aw * k) + 'px;' +
+                      'top:' + (top * k) + 'px;height:' + (ah * k) + 'px';
+    box.appendChild(u);
+    x += aw + c.gap; n++;
+  }
+}
+function layoutInto(box, pic, L, R, v){
+  const bw = box.clientWidth;
+  if (!bw) return;
+  const k = bw / v.w;                 /* 画面を縮めて見せる倍率 */
+  box.innerHTML = '';
+  const pl = roomPlan(v, pic.w / pic.h, L, R);
+  const mk = (cls, css) => {
+    const d = document.createElement('i');
+    d.className = cls;
+    d.style.cssText = 'background-image:url("' + pic.url + '");' + css;
+    box.appendChild(d);
+  };
+  if (pl.cover){
+    mk('m', 'left:0;right:0;background-size:cover;background-position:center');
+    drawArts(box, v, k, edgeOf(v), v.w - edgeOf(v));
+    return;
+  } else {
+    mk('m', 'left:' + (pl.sl * k) + 'px;right:' + (pl.sr * k) + 'px;' +
+            'background-size:' + (pl.midW * k) + 'px 100%;' +
+            'background-position:' + (pl.midX * k) + 'px center');
+    mk('l', 'width:' + (pl.sl * k) + 'px;background-size:' + (pl.W * k) + 'px 100%;' +
+            'background-position:left center');
+    mk('r', 'width:' + (pl.sr * k) + 'px;background-size:' + (pl.W * k) + 'px 100%;' +
+            'background-position:right center');
+  }
+  drawArts(box, v, k, pl.sl + 14, v.w - pl.sr);
+}
+function drawScene(){
+  const need = $('#sceneNeed');
+  const v = sceneVals();
+  $('#sceneLv').textContent = v.L + '%';
+  $('#sceneRv').textContent = v.R + '%';
+  if (!PIC.scene){ need.hidden = false; $('#pvPc').innerHTML = ''; $('#pvSp').innerHTML = ''; return; }
+  need.hidden = true;
+  layoutInto($('#pvPc'), PIC.scene, v.L, v.R, VP.pc);
+  layoutInto($('#pvSp'), PIC.scene, v.L, v.R, VP.sp);
+}
+$('#scenePick').addEventListener('click', () => {
+  pickImage(pic => {
+    PIC.scene = pic;
+    if (!$('#sceneFile').value.trim()) $('#sceneFile').value = pic.name;
+    drawScene();
+  });
+});
+['sceneL','sceneR'].forEach(k => $('#' + k).addEventListener('input', drawScene));
+$('#sceneDark').addEventListener('change', drawScene);
+$('#sceneFile').addEventListener('input', drawScene);
+
+/* 床の色（柄のときに使います） */
+function shade(hex, k){
+  const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || '').trim());
+  if (!m) return '#8E8B83';
+  const n = parseInt(m[1], 16);
+  const f = v => Math.max(0, Math.min(255, Math.round(v * k)));
+  const r = f((n >> 16) & 255), g = f((n >> 8) & 255), b = f(n & 255);
+  return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('').toUpperCase();
+}
+function floorCss(){
+  const c = $('#patFloor').value;
+  return { '--floor': c.toUpperCase(), '--floor-dk': shade(c, .82) };
+}
+$('#patFloor').addEventListener('input', () => {
+  $('#patFloorV').textContent = $('#patFloor').value.toUpperCase();
+  drawPattern();
+});
+
+/* ---------- 柄の壁 ---------- */
+function drawPattern(){
+  const size = +$('#patSize').value;
+  $('#patSizev').textContent = size;
+  const need = $('#patNeed');
+  if (!PIC.pattern){ need.hidden = false; $('#pvPatPc').innerHTML = ''; $('#pvPatSp').innerHTML = ''; return; }
+  need.hidden = true;
+  [['#pvPatPc', VP.pc], ['#pvPatSp', VP.sp]].forEach(([sel, v]) => {
+    const box = $(sel);
+    const bw = box.clientWidth;
+    if (!bw) return;
+    const k = bw / v.w;
+    box.innerHTML = '';
+    const d = document.createElement('div');
+    d.className = 'tile';
+    d.style.cssText = 'background-image:url("' + PIC.pattern.url + '");' +
+      'background-size:' + Math.max(3, size * k) + 'px auto;bottom:26%';
+    box.appendChild(d);
+    const fl = document.createElement('div');
+    const fc = floorCss();
+    fl.style.cssText = 'position:absolute;left:0;right:0;bottom:0;height:26%;' +
+      'background:linear-gradient(180deg,' + fc['--floor-dk'] + ',' + fc['--floor'] + ')';
+    box.appendChild(fl);
+    drawArts(box, v, k, edgeOf(v), v.w - edgeOf(v));
+  });
+}
+$('#patPick').addEventListener('click', () => {
+  pickImage(pic => {
+    PIC.pattern = pic;
+    if (!$('#patFile').value.trim()) $('#patFile').value = pic.name;
+    drawPattern();
+  });
+});
+$('#patSize').addEventListener('input', drawPattern);
+$('#patFile').addEventListener('input', drawPattern);
+
+/* ---------- 入口の絵 ---------- */
+function drawEnt(){
+  const need = $('#entNeed');
+  if (!PIC.ent){ need.hidden = false; $('#pvEntPc').innerHTML = ''; $('#pvEntSp').innerHTML = ''; return; }
+  need.hidden = true;
+  ['#pvEntPc', '#pvEntSp'].forEach(k => {
+    const box = $(k);
+    box.innerHTML =
+      '<div style="position:absolute;inset:0;background:url(\'' + PIC.ent.url + '\') center/cover no-repeat"></div>' +
+      '<div style="position:absolute;inset:0;background:' +
+        'linear-gradient(180deg,rgba(10,9,12,.6) 0%,rgba(10,9,12,.12) 26%,transparent 42%),' +
+        'linear-gradient(0deg,rgba(10,9,12,.68) 0%,rgba(10,9,12,.16) 24%,transparent 40%)"></div>' +
+      '<div style="position:absolute;left:0;right:0;top:9%;text-align:center;color:#EDF0F2;' +
+        'font-family:var(--mincho);font-size:' + (box.clientWidth > 160 ? 15 : 10) + 'px;' +
+        'letter-spacing:.14em;text-shadow:0 2px 10px rgba(0,0,0,.7)">' +
+        esc($('#title').value.trim() || '展示タイトル') + '</div>' +
+      '<div style="position:absolute;left:50%;bottom:9%;translate:-50% 0;color:#EDF0F2;' +
+        'font-family:var(--mincho);font-size:' + (box.clientWidth > 160 ? 10 : 7) + 'px;' +
+        'letter-spacing:.4em;padding:' + (box.clientWidth > 160 ? '7px 16px' : '5px 10px') + ';' +
+        'border:1px solid rgba(244,240,232,.5);background:rgba(14,12,18,.36)">ENTER</div>';
+  });
+}
+$('#entPick').addEventListener('click', () => {
+  pickImage(pic => {
+    PIC.ent = pic;
+    if (!$('#entFile').value.trim()) $('#entFile').value = pic.name;
+    drawEnt();
+  });
+});
+$('#entFile').addEventListener('input', drawEnt);
+$('#title').addEventListener('input', drawEnt);
+window.addEventListener('resize', () => { drawScene(); drawPattern(); drawEnt(); });
+
+/* ---------- 書き出す形 ---------- */
+function wallConfig(){
+  const m = wallMode();
+  if (m === 'scene'){
+    const v = sceneVals();
+    return '{ type:"scene", file:' + q(v.file) + ', left:' + v.L + ', right:' + v.R +
+           ', dark:' + (v.dark ? 'true' : 'false') + ' }';
+  }
+  if (m === 'pattern'){
+    return '{ type:"pattern", file:' + q($('#patFile').value.trim() || 'wall.png') +
+           ', size:' + (+$('#patSize').value) +
+           ', dark:' + ($('#patDark').checked ? 'true' : 'false') + ' }';
+  }
+  return '{ type:"color" }';
+}
+function entConfig(){
+  return entMode() === 'image' ? q($('#entFile').value.trim() || 'gate.png') : q('');
+}
+
+
 /* ---------- 設定を組み立てる ---------- */
 function q(s){
   return '"' + String(s == null ? '' : s)
     .replace(/\\/g, '\\\\').replace(/"/g, '\\"')
     .replace(/\r/g, '').replace(/\n/g, '\\n') + '"';
+}
+
+/* ---------- ひとりの展示か、合同展か ---------- */
+function useMode(){
+  const r = document.querySelector('input[name=usemode]:checked');
+  return r ? r.value : 'solo';
+}
+function showUse(){
+  const g = (useMode() === 'group');
+  $('#um-group').hidden = !g;
+  const es = $('#entSec');
+  if (es && TIER !== 'basic') es.hidden = g;   /* 合同展に扉はありません */
+  if (es && TIER === 'basic') applyTier();
+  renumber();
+}
+document.querySelectorAll('input[name=usemode]').forEach(r =>
+  r.addEventListener('change', showUse));
+if (LOBBY_DEFAULT) $('#lobbyUrl').value = LOBBY_DEFAULT;
+showUse();
+
+/* ---------- オプションのキーワード ---------- */
+$('#optKey').addEventListener('input', readOptKeys);
+
+/* ---------- 部屋の両端の飾り ---------- */
+(function(){
+  const sel = $('#decoSet');
+  DECO_SETS.forEach(d => {
+    const o = document.createElement('option');
+    o.value = d.id; o.textContent = d.name;
+    sel.appendChild(o);
+  });
+})();
+function decoMode(){
+  const r = document.querySelector('input[name=decomode]:checked');
+  return r ? r.value : 'none';
+}
+function showDeco(){
+  const m = decoMode();
+  $('#dm-ready').hidden = (m !== 'ready');
+  $('#dm-own').hidden   = (m !== 'own');
+  $('#dm-size').hidden  = (m === 'none');
+}
+document.querySelectorAll('input[name=decomode]').forEach(r =>
+  r.addEventListener('change', showDeco));
+$('#decoH').addEventListener('input', e => { $('#decoHv').textContent = e.target.value + '%'; });
+$('#decoY').addEventListener('input', e => { $('#decoYv').textContent = e.target.value + 'px'; });
+showDeco();
+
+function decoConfig(){
+  const m = decoMode();
+  if (m === 'none') return '{ left:"", right:"", height:62, offset:0 }';
+  let L = '', R = '';
+  if (m === 'ready'){
+    const d = DECO_SETS.filter(x => x.id === $('#decoSet').value)[0] || DECO_SETS[0];
+    if (d){ L = d.left; R = d.right; }
+  } else {
+    L = $('#decoL').value.trim();
+    R = $('#decoR').value.trim();
+  }
+  let s = '{ left:' + q(L) + ', right:' + q(R) +
+          ', height:' + (+$('#decoH').value || 62) +
+          ', offset:' + (+$('#decoY').value || 0);
+  if (hasOpt('yuragi')){
+    const gl = parseGlow($('#decoGlowL').value);
+    const gr = parseGlow($('#decoGlowR').value);
+    if (gl) s += ', glowL:' + glowLiteral(gl);
+    if (gr) s += ', glowR:' + glowLiteral(gr);
+  }
+  return s + ' }';
 }
 
 function buildConfig(){
@@ -1108,18 +2557,45 @@ function buildConfig(){
   s += '  closing:  ' + q($('#closing').value.trim()) + ',\n';
   s += '  links: [\n';
   s += links.map(l => '    { label:' + q(l.label) + ', url:' + q(l.url) + ' }').join(',\n');
-  s += (links.length ? '\n' : '') + '  ]\n};\n\n';
+  s += (links.length ? '\n' : '') + '  ],\n';
+  s += '\n  /* 壁　color＝色で決める／scene＝自分の絵／pattern＝自分の柄 */\n';
+  s += '  wall:     ' + wallConfig() + ',\n';
+  s += '  /* 合同展のロビーのURL。空ならひとりの展示です */\n';
+  s += '  lobby: ' + q(useMode() === 'group' ? $('#lobbyUrl').value.trim() : '') + ',\n';
+  s += '  /* GA4の測定ID。空なら何も計測しません */\n';
+  s += '  ga: ' + q(hasOpt('ga4') ? $('#gaId').value.trim() : '') + ',\n';
+  s += '  /* 入口の絵のファイル名。空なら、いままでの扉になります */\n';
+  s += '  entrance: ' + entConfig() + ',\n';
+  s += '  /* 入口の絵に置いた光 */\n';
+  s += '  entranceGlow: ' +
+       glowLiteral(hasOpt('yuragi') ? parseGlow($('#entGlow').value) : null) + ',\n';
+  s += '  /* 部屋の両端に置く飾り */\n';
+  s += '  side: ' + decoConfig() + ',\n';
+  s += '  /* ④で決めた色が暗い色のときは true にします */\n';
+  s += '  dark: ' + ($('#wallDark').checked ? 'true' : 'false') + '\n};\n\n';
 
   let no = 1;
   s += 'const ROOMS = [\n';
   s += rooms.map(r => {
-    const works = r.works.map(w =>
-      '      { file:' + q('art' + pad(no++) + '.png') +
-      ', title:' + q((w.title || '').trim()) +
-      ', caption:' + q((w.caption || '').trim()) + ' }'
-    ).join(',\n');
+    const works = r.works.map(w => {
+      let t = '      { file:' + q(fileOf(no++, w.movie)) +
+              ', title:' + q((w.title || '').trim()) +
+              ', caption:' + q((w.caption || '').trim());
+      if (hasOpt('link') && (w.link || '').trim()) t += ', link:' + q(w.link.trim());
+      if (hasOpt('yuragi')){
+        const g = parseGlow(w.glowText);
+        if (g) t += ', glow:' + glowLiteral(g);
+      }
+      return t + ' }';
+    }).join(',\n');
+    const col = String(r.color || '').split(/\n/)
+      .map(x => x.trim()).filter(Boolean).join('');
     return '  { name:' + q((r.name || 'ROOM').trim()) +
-           ', jp:' + q((r.jp || '').trim()) + ', works:[\n' + works + '\n  ]}';
+           ', jp:' + q((r.jp || '').trim()) +
+           ', color:' + q(col) +
+           ', wall:' + q((r.wall || '').trim()) +
+           ', dark:' + (r.dark ? 'true' : 'false') +
+           ', works:[\n' + works + '\n  ]}';
   }).join(',\n');
   s += '\n];';
   return s;
@@ -1132,7 +2608,8 @@ function makeHtml(){
 
   /* 色を差し替える */
   const got = checkPaste();
-  const all = Object.assign({}, got.w, got.e);
+  const all = Object.assign({}, got.w, got.e,
+    (wallMode() === 'pattern') ? floorCss() : {});
   Object.keys(all).forEach(k => {
     const re = new RegExp('(\\n\\s*' + k + '\\s*:)[^;]*;');
     tpl = tpl.replace(re, '$1' + all[k] + ';');
@@ -1175,6 +2652,20 @@ $('#preview').addEventListener('click', () => {
 });
 
 drawRooms();
+showMode();
+applyTier();
+renumber();
+
+/* 基本編のときは、見出しと説明を差し替えます */
+if (TIER === 'basic'){
+  document.title = 'オンライン個展 かんたん設定（基本編）';
+  const eb = document.querySelector('header .eyebrow');
+  const h1 = document.querySelector('header h1');
+  const ph = document.querySelector('header p');
+  if (eb) eb.textContent = 'ONLINE EXHIBITION';
+  if (h1) h1.textContent = 'かんたん設定（基本編）';
+  if (ph) ph.textContent = '入力して、いちばん下のボタンを押すだけです。';
+}
 </script>
 </body>
 </html>

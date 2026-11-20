@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ゆらぎツール</title>
+<style>
+:root{
+  --ink:#23201C;
+  --sub:#6B655C;
+  --line:#DCD5C9;
+  --bg:#F6F3EC;
+  --card:#FFFFFF;
+  --gold:#B08A4A;
+  --stage:#121016;
+  --mincho:"Hiragino Mincho ProN","Yu Mincho","YuMincho",Georgia,serif;
+  --gothic:"Hiragino Sans","Yu Gothic","YuGothic","Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--gothic);color:var(--ink);background:var(--bg);line-height:1.7;
+  -webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+.wrap{max-width:1180px;margin:0 auto;padding:28px 18px 80px}
+
+header h1{font-family:var(--mincho);font-weight:400;font-size:25px;letter-spacing:.1em}
+header p{color:var(--sub);font-size:13.5px;margin-top:8px}
+
+/* ---------- 置き場所 ---------- */
+.drop{margin-top:22px;border:2px dashed var(--line);border-radius:10px;
+  background:var(--card);padding:40px 20px;text-align:center;transition:border-color .2s,background .2s}
+.drop.over{border-color:var(--gold);background:#FFFBF2}
+.drop p{color:var(--sub);font-size:13.5px}
+.pick{display:inline-block;margin-top:14px;padding:11px 26px;border:1px solid var(--ink);
+  border-radius:6px;font-size:14px;transition:background .2s,color .2s}
+.pick:hover{background:var(--ink);color:#fff}
+.tiny{font-size:12px;color:var(--sub);margin-top:14px}
+
+/* ---------- 作業台 ---------- */
+.board{display:none;margin-top:22px;gap:20px;
+  grid-template-columns:minmax(0,1fr) 300px;align-items:start}
+body.ready .board{display:grid}
+body.ready .drop{display:none}
+
+.stagebox{background:var(--stage);border-radius:10px;padding:14px;position:relative;
+  overflow:hidden}
+.stage{position:relative;margin:0 auto;cursor:crosshair;user-select:none;
+  max-width:100%;line-height:0}
+.stage img{display:block;width:100%;height:auto;
+  -webkit-user-drag:none;transition:filter .5s ease}
+body.dimmed .stage img{filter:brightness(.5) saturate(.92)}
+
+.g{position:absolute;border-radius:50%;pointer-events:auto;cursor:move;
+  transform:translate(-50%,-50%)}
+.g .lit{position:absolute;inset:0;border-radius:50%;mix-blend-mode:screen}
+.g .ring{position:absolute;inset:-6px;border-radius:50%;
+  border:1px dashed rgba(255,255,255,.6);opacity:0;
+  box-shadow:0 0 0 1px rgba(0,0,0,.45), inset 0 0 0 1px rgba(0,0,0,.35);
+  transition:opacity .15s}
+.g .ring::after{content:"";position:absolute;left:50%;top:50%;width:3px;height:3px;
+  margin:-1.5px 0 0 -1.5px;border-radius:50%;background:#fff;
+  box-shadow:0 0 0 1px rgba(0,0,0,.5)}
+body.editing .g .ring{opacity:.55}
+body.editing .g.sel .ring{opacity:1;border-color:#FFE6A8;border-style:solid;
+  box-shadow:0 0 0 1px rgba(0,0,0,.4)}
+body:not(.editing) .g{pointer-events:none}
+
+@keyframes flicker{
+  0%,100%{opacity:.35} 18%{opacity:.62} 31%{opacity:.42}
+  52%{opacity:.70} 68%{opacity:.40} 84%{opacity:.58}
+}
+@keyframes breathe{0%,100%{opacity:.25}50%{opacity:.60}}
+@keyframes steady{0%,100%{opacity:.62}}
+
+/* 順番に点ける */
+body.sequence .g .lit{opacity:0;animation:none !important}
+body.sequence.playing .g.on .lit{opacity:1;animation:var(--anim) !important}
+body.sequence.editing .g .lit{opacity:1;animation:var(--anim) !important}
+body.sequence .g .lit{transition:opacity .45s ease}
+
+/* ---------- 右の棚 ---------- */
+.side{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 16px 18px}
+.card h2{font-family:var(--mincho);font-size:14.5px;font-weight:400;letter-spacing:.06em;
+  padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:14px}
+
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.row:last-child{margin-bottom:0}
+.row label{font-size:13px;color:var(--sub);white-space:nowrap}
+.row .val{font-size:12.5px;color:var(--sub);min-width:42px;text-align:right;
+  font-variant-numeric:tabular-nums}
+input[type=range]{flex:1;min-width:0;accent-color:var(--gold)}
+select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;
+  background:#fff;font-size:13.5px}
+
+.btn{display:block;width:100%;padding:11px 14px;border:1px solid var(--ink);border-radius:6px;
+  font-size:13.5px;text-align:center;transition:background .2s,color .2s}
+.btn:hover{background:var(--ink);color:#fff}
+.btn.ghost{border-color:var(--line);color:var(--sub)}
+.btn.ghost:hover{background:#EFEAE0;color:var(--ink)}
+.btn.lead{background:var(--ink);color:#fff}
+.btn.lead:hover{background:#000}
+.btn + .btn{margin-top:8px}
+.btn[disabled]{opacity:.4;pointer-events:none}
+
+.count{font-size:12.5px;color:var(--sub);text-align:center;margin-bottom:12px}
+.hint{font-size:12px;color:var(--sub);margin-top:12px;line-height:1.8}
+
+/* ---------- 書き出し ---------- */
+.out{display:none;margin-top:22px}
+body.ready .out{display:block}
+.out textarea{width:100%;height:190px;padding:14px;border:1px solid var(--line);
+  border-radius:8px;background:#fff;font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:12.5px;line-height:1.7;resize:vertical;white-space:pre}
+.outbar{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.outbar .btn{width:auto;flex:0 0 auto;padding:10px 20px}
+
+.said{font-size:12.5px;color:var(--gold);margin-top:10px;min-height:1.4em}
+
+@media (max-width:860px){
+  .board{grid-template-columns:1fr}
+  .side{order:2}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>ゆらぎツール</h1>
+  <p>絵の上をクリックすると、そこに光が置けます。ろうそく、窓明かり、ツリーの電飾。</p>
+</header>
+
+<div class="drop" id="drop">
+  <p>絵をここにドラッグするか、下から選んでください</p>
+  <label class="pick">絵を選ぶ<input type="file" id="file" accept="image/*" hidden></label>
+  <p class="tiny">絵はこのページの中だけで開きます。どこにも送られません。</p>
+</div>
+
+<div class="board">
+
+  <div class="stagebox">
+    <div class="stage" id="stage"><img id="pic" alt=""></div>
+  </div>
+
+  <div class="side">
+
+    <div class="card">
+      <h2>選んでいる光</h2>
+      <div class="count" id="count">まだ光がありません</div>
+      <div class="row">
+        <label>大きさ</label>
+        <input type="range" id="size" min="1" max="40" step="0.5" value="8">
+        <span class="val" id="vsize">8</span>
+      </div>
+      <div class="row">
+        <label>強さ</label>
+        <input type="range" id="power" min="20" max="140" step="5" value="100">
+        <span class="val" id="vpower">100</span>
+      </div>
+      <div class="row">
+        <label>速さ</label>
+        <input type="range" id="speed" min="1.2" max="8" step=".2" value="3.4">
+        <span class="val" id="vspeed">3.4</span>
+      </div>
+      <div class="row" style="display:block">
+        <label style="display:block;margin-bottom:6px">色</label>
+        <select id="tone">
+          <option value="ember">ろうそく・かぼちゃ（橙）</option>
+          <option value="warm">電球・ツリー（金）</option>
+          <option value="window">窓あかり（白）</option>
+          <option value="cool">月・雪（青白）</option>
+          <option value="rose">魔法（桃）</option>
+        </select>
+      </div>
+      <div class="row" style="display:block;margin-top:12px">
+        <label style="display:block;margin-bottom:6px">ゆれ方</label>
+        <select id="motion">
+          <option value="flicker">ちらちら</option>
+          <option value="breathe">ゆっくり</option>
+          <option value="steady">ゆれない</option>
+        </select>
+      </div>
+      <button class="btn ghost" id="del" style="margin-top:14px" disabled>この光を消す</button>
+    </div>
+
+    <div class="card">
+      <h2>全体</h2>
+      <div class="row" style="display:block">
+        <label style="display:block;margin-bottom:6px">点きかた</label>
+        <select id="mode">
+          <option value="always">ずっとゆれている</option>
+          <option value="sequence">順番に点ける</option>
+        </select>
+      </div>
+      <div class="row" id="steprow" hidden>
+        <label>間かく</label>
+        <input type="range" id="step" min="40" max="300" step="5" value="95">
+        <span class="val" id="vstep">95</span>
+      </div>
+      <button class="btn" id="play">動かして見る</button>
+      <button class="btn ghost" id="dim">まわりを暗くする</button>
+      <button class="btn ghost" id="clear">全部消す</button>
+      <p class="hint">
+        光をクリックすると選べます。そのまま動かせます。<br>
+        BackSpace でも消せます。
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<div class="out">
+  <h2 style="font-family:var(--mincho);font-weight:400;font-size:15px;letter-spacing:.06em;margin-bottom:10px">書き出し</h2>
+  <textarea id="code" spellcheck="false"></textarea>
+  <div class="outbar">
+    <button class="btn lead" id="copy">コピーする</button>
+    <button class="btn ghost" id="load">書き出したものを読み込む</button>
+    <button class="btn ghost" id="other">別の絵にする</button>
+  </div>
+  <div class="said" id="said"></div>
+  <p class="hint">
+    テンプレートの <code>const GLOWS = [</code> から <code>];</code> までを、
+    これで置き換えてください。<br>
+    置き場所を変えたくなったら、上の文字をここに貼って「読み込む」を押すと、続きから直せます。
+  </p>
+</div>
+
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+
+/* 色の作り方（テンプレート側と同じです） */
+const TONES = {
+  ember:  ['rgba(255,170,80,.95)',  'rgba(255,140,50,.35)'],
+  warm:   ['rgba(255,214,150,.95)', 'rgba(255,180,90,.35)'],
+  window: ['rgba(255,240,210,.95)', 'rgba(255,225,175,.35)'],
+  cool:   ['rgba(205,230,255,.95)', 'rgba(150,195,245,.35)'],
+  rose:   ['rgba(255,205,225,.95)', 'rgba(255,160,200,.35)']
+};
+
+let glows = [];      /* {x,y,size,power,speed,tone,motion,el} */
+let sel = null;
+let ratio = 1;       /* 絵の 横 ÷ 縦 */
+let seq = [];
+
+/* ---------- 絵を読み込む ---------- */
+const drop = $('#drop'), pic = $('#pic'), stage = $('#stage');
+
+['dragenter','dragover'].forEach(k => drop.addEventListener(k, e => {
+  e.preventDefault(); drop.classList.add('over');
+}));
+['dragleave','drop'].forEach(k => drop.addEventListener(k, e => {
+  e.preventDefault(); drop.classList.remove('over');
+}));
+drop.addEventListener('drop', e => {
+  const f = e.dataTransfer.files[0]; if (f) open(f);
+});
+$('#file').addEventListener('change', e => {
+  const f = e.target.files[0]; if (f) open(f);
+});
+
+function open(file){
+  if (!/^image\//.test(file.type)){ say('画像のファイルを選んでください'); return; }
+  const r = new FileReader();
+  r.onload = () => {
+    pic.onload = () => {
+      ratio = pic.naturalWidth / pic.naturalHeight;
+      document.body.classList.add('ready','editing');
+      glows.forEach(paint);
+      emit();
+    };
+    pic.src = r.result;
+  };
+  r.readAsDataURL(file);
+}
+
+/* ---------- 光を置く ---------- */
+stage.addEventListener('pointerdown', e => {
+  if (!document.body.classList.contains('editing')) return;
+  if (e.target.closest('.g')) return;
+  const r = stage.getBoundingClientRect();
+  add({
+    x: +(((e.clientX - r.left) / r.width)  * 100).toFixed(1),
+    y: +(((e.clientY - r.top)  / r.height) * 100).toFixed(1)
+  });
+});
+
+function add(p){
+  const g = Object.assign({
+    size: sel ? sel.size : 8,
+    power: sel ? sel.power : 100,
+    speed: sel ? sel.speed : 3.4,
+    tone: sel ? sel.tone : $('#tone').value,
+    motion: sel ? sel.motion : $('#motion').value
+  }, p);
+  const el = document.createElement('span');
+  el.className = 'g';
+  el.innerHTML = '<span class="lit"></span><span class="ring"></span>';
+  stage.appendChild(el);
+  g.el = el;
+  glows.push(g);
+  grab(el, g);
+  paint(g);
+  select(g);
+  emit();
+}
+
+function paint(g){
+  const [a, b] = TONES[g.tone] || TONES.warm;
+  const k = g.power / 100;
+  g.el.style.left   = g.x + '%';
+  g.el.style.top    = g.y + '%';
+  g.el.style.width  = g.size + '%';
+  g.el.style.height = (g.size * ratio) + '%';
+  const lit = g.el.querySelector('.lit');
+  lit.style.background =
+    'radial-gradient(closest-side,' + a + ',' + b + ',transparent)';
+  lit.style.opacity = '';
+  const anim = g.motion + ' ' + g.speed + 's ease-in-out infinite';
+  lit.style.animation = anim;
+  lit.style.animationDelay = (-(g.speed * ((glows.indexOf(g) * 0.37) % 1))).toFixed(2) + 's';
+  lit.style.filter = 'brightness(' + k.toFixed(2) + ')';
+  g.el.style.setProperty('--anim', anim);
+}
+
+function select(g){
+  sel = g;
+  glows.forEach(o => o.el.classList.toggle('sel', o === g));
+  $('#del').disabled = !g;
+  if (!g){ $('#count').textContent = glows.length ? glows.length + ' 個の光' : 'まだ光がありません'; return; }
+  $('#count').textContent = (glows.indexOf(g) + 1) + ' 個め ／ ぜんぶで ' + glows.length + ' 個';
+  $('#size').value = g.size;   $('#vsize').textContent = g.size;
+  $('#power').value = g.power; $('#vpower').textContent = g.power;
+  $('#speed').value = g.speed; $('#vspeed').textContent = g.speed;
+  $('#tone').value = g.tone;
+  $('#motion').value = g.motion;
+}
+
+/* つまんで動かす */
+function grab(el, g){
+  let moved = false;
+  el.addEventListener('pointerdown', e => {
+    if (!document.body.classList.contains('editing')) return;
+    e.stopPropagation();
+    select(g); moved = false;
+    el.setPointerCapture(e.pointerId);
+    const r = stage.getBoundingClientRect();
+    const move = ev => {
+      moved = true;
+      g.x = +Math.max(0, Math.min(100, ((ev.clientX - r.left) / r.width)  * 100)).toFixed(1);
+      g.y = +Math.max(0, Math.min(100, ((ev.clientY - r.top)  / r.height) * 100)).toFixed(1);
+      paint(g);
+    };
+    const up = () => {
+      el.removeEventListener('pointermove', move);
+      el.removeEventListener('pointerup', up);
+      if (moved) emit();
+    };
+    el.addEventListener('pointermove', move);
+    el.addEventListener('pointerup', up);
+  });
+}
+
+/* ---------- つまみ ---------- */
+function tie(id, key, label, fix){
+  $(id).addEventListener('input', e => {
+    const v = +e.target.value;
+    $(label).textContent = fix ? v.toFixed(1) : v;
+    if (!sel) return;
+    sel[key] = v; paint(sel); emit();
+  });
+}
+tie('#size','size','#vsize',true);
+tie('#power','power','#vpower',false);
+tie('#speed','speed','#vspeed',true);
+
+['#tone','#motion'].forEach(id => {
+  $(id).addEventListener('change', e => {
+    if (!sel) return;
+    sel[id === '#tone' ? 'tone' : 'motion'] = e.target.value;
+    paint(sel); emit();
+  });
+});
+
+$('#del').addEventListener('click', () => remove(sel));
+document.addEventListener('keydown', e => {
+  if ((e.key === 'Backspace' || e.key === 'Delete') && sel &&
+      !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)){
+    e.preventDefault(); remove(sel);
+  }
+});
+function remove(g){
+  if (!g) return;
+  g.el.remove();
+  glows = glows.filter(o => o !== g);
+  select(null); emit();
+}
+
+$('#clear').addEventListener('click', () => {
+  if (!glows.length) return;
+  glows.forEach(g => g.el.remove());
+  glows = []; select(null); emit();
+  say('全部消しました');
+});
+
+$('#dim').addEventListener('click', e => {
+  document.body.classList.toggle('dimmed');
+  e.target.textContent = document.body.classList.contains('dimmed')
+    ? 'まわりを明るくする' : 'まわりを暗くする';
+});
+
+$('#mode').addEventListener('change', e => {
+  const s = e.target.value === 'sequence';
+  $('#steprow').hidden = !s;
+  document.body.classList.toggle('sequence', s);
+  document.body.classList.remove('playing');
+  glows.forEach(g => g.el.classList.remove('on'));
+  emit();
+});
+$('#step').addEventListener('input', e => { $('#vstep').textContent = e.target.value; emit(); });
+
+/* ---------- 動かして見る ---------- */
+$('#play').addEventListener('click', () => {
+  seq.forEach(clearTimeout); seq = [];
+  const was = document.body.classList.contains('editing');
+  document.body.classList.remove('editing');
+
+  if ($('#mode').value === 'sequence'){
+    document.body.classList.add('playing');
+    glows.forEach(g => g.el.classList.remove('on'));
+    const order = glows.slice().sort((a, b) => b.y - a.y);
+    const step = +$('#step').value;
+    order.forEach((g, i) => seq.push(setTimeout(() => g.el.classList.add('on'), step * i)));
+    seq.push(setTimeout(() => { if (was) document.body.classList.add('editing'); },
+             step * order.length + 2200));
+  } else {
+    seq.push(setTimeout(() => { if (was) document.body.classList.add('editing'); }, 4000));
+  }
+  say('動かしています。クリックで編集に戻ります。');
+});
+stage.addEventListener('click', () => {
+  if (!document.body.classList.contains('editing')){
+    seq.forEach(clearTimeout); seq = [];
+    document.body.classList.add('editing');
+    say('');
+  }
+}, true);
+
+/* ---------- 書き出し ---------- */
+function emit(){
+  const mode = $('#mode').value;
+  const lines = glows.map(g =>
+    '  { x:' + g.x + ', y:' + g.y + ', size:' + g.size +
+    ', power:' + g.power + ', tone:"' + g.tone +
+    '", motion:"' + g.motion + '", speed:' + g.speed + ' }'
+  ).join(',\n');
+  let t = '';
+  if (mode === 'sequence'){
+    t += '/* 下から順に、' + $('#step').value + 'ミリ秒ずつ点きます */\n';
+    t += 'const GLOW_MODE = "sequence";\n';
+    t += 'const GLOW_STEP = ' + $('#step').value + ';\n\n';
+  } else {
+    t += 'const GLOW_MODE = "always";\n\n';
+  }
+  t += 'const GLOWS = [\n' + lines + '\n];';
+  $('#code').value = t;
+}
+
+$('#copy').addEventListener('click', async () => {
+  const t = $('#code');
+  try { await navigator.clipboard.writeText(t.value); }
+  catch(e){ t.select(); document.execCommand('copy'); }
+  say('コピーしました');
+});
+
+$('#load').addEventListener('click', () => {
+  const src = $('#code').value;
+  const m = src.match(/const\s+GLOWS\s*=\s*(\[[\s\S]*?\])\s*;/);
+  if (!m){ say('GLOWS が見つかりませんでした'); return; }
+  let list;
+  try { list = new Function('return ' + m[1] + ';')(); }
+  catch(e){ say('うまく読めませんでした'); return; }
+  if (!Array.isArray(list)){ say('うまく読めませんでした'); return; }
+
+  const mm = src.match(/GLOW_MODE\s*=\s*"(\w+)"/);
+  const sm = src.match(/GLOW_STEP\s*=\s*(\d+)/);
+  if (mm){
+    $('#mode').value = mm[1] === 'sequence' ? 'sequence' : 'always';
+    $('#mode').dispatchEvent(new Event('change'));
+  }
+  if (sm){ $('#step').value = sm[1]; $('#vstep').textContent = sm[1]; }
+
+  glows.forEach(g => g.el.remove()); glows = []; select(null);
+  list.forEach(p => add({
+    x: +p.x || 0, y: +p.y || 0, size: +p.size || 8,
+    power: p.power == null ? 100 : +p.power,
+    speed: +p.speed || 3.4,
+    tone: p.tone || 'warm', motion: p.motion || 'flicker'
+  }));
+  select(null);
+  say(list.length + ' 個の光を読み込みました');
+});
+
+$('#other').addEventListener('click', () => {
+  document.body.classList.remove('ready');
+  say('絵を選び直してください。光はそのまま残っています。');
+});
+
+let saidT;
+function say(t){
+  $('#said').textContent = t;
+  clearTimeout(saidT);
+  if (t) saidT = setTimeout(() => { $('#said').textContent = ''; }, 4000);
+}
+
+/* 窓の大きさが変わったら、縦横の比を取り直す */
+window.addEventListener('resize', () => {
+  if (!pic.naturalWidth) return;
+  ratio = pic.naturalWidth / pic.naturalHeight;
+  glows.forEach(paint);
+});
+emit();
+</script>
+</body>
+</html>
